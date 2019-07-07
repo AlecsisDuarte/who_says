@@ -1,0 +1,95 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="TitleText" parent="TextAppearance.AppCompat.Title">
+        <item name="fontFamily">@font/viga</item>
+        <item name="android:textSize">@dimen/title_text_size</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="ContentText" parent="TextAppearance.AppCompat.Body1">
+        <item name="fontFamily">@font/space_mono</item>
+        <item name="android:textSize">@dimen/content_text_size</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="fontFamily">@font/space_mono</item>
+        <item name="android:textSize">@dimen/content_text_size</item>
+    </style>
+
+    <style name="OutlineButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="fontFamily">@font/space_mono</item>
+        <item name="android:textSize">@dimen/content_text_size</item>
+    </style>
+
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <!--<item name="android:background">?android:attr/divider</item>-->
+        <item name="android:background">@color/card_shadow_color</item>
+    </style>
+
+    <style name="CardButton" parent="Widget.AppCompat.ImageButton">
+        <item name="android:background">@drawable/card_button_background</item>
+        <item name="android:layout_width">@dimen/card_button_width</item>
+        <item name="android:layout_height">@dimen/card_button_height</item>
+    </style>
+
+    <style name="SimonButton" parent="Widget.AppCompat.ImageButton">
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:onClick">onSimonButtonClick</item>
+    </style>
+
+    <style name="YellowSimonButton" parent="SimonButton">
+        <item name="android:contentDescription">Yellow Button</item>
+        <item name="android:background">@drawable/simon_yellow_button_bg</item>
+    </style>
+
+    <style name="RedSimonButton" parent="SimonButton">
+        <item name="android:contentDescription">Red Button</item>
+        <item name="android:background">@drawable/simon_red_button_bg</item>
+    </style>
+
+    <style name="GreenSimonButton" parent="SimonButton">
+        <item name="android:contentDescription">Green Button</item>
+        <item name="android:background">@drawable/simon_green_button_bg</item>
+    </style>
+
+    <style name="BlueSimonButton" parent="SimonButton">
+        <item name="android:background">@drawable/simon_blue_button_bg</item>
+    </style>
+
+    <style name="PurpleSimonButton" parent="SimonButton">
+        <item name="android:background">@drawable/simon_purple_button_bg</item>
+    </style>
+
+    <style name="OrangeSimonButton" parent="SimonButton">
+        <item name="android:background">@drawable/simon_orange_button_bg</item>
+    </style>
+
+    <style name="LimeSimonButton" parent="SimonButton">
+        <item name="android:background">@drawable/simon_lime_button_bg</item>
+    </style>
+
+    <style name="TealSimonButton" parent="SimonButton">
+        <item name="android:background">@drawable/simon_teal_button_bg</item>
+    </style>
+
+    <style name="GraySimonButton" parent="SimonButton">
+        <item name="android:background">@drawable/simon_gray_button_bg</item>
+    </style>
+
+
+</resources>

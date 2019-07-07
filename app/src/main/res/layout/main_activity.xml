@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/backgroundLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/normal_gradient_animation"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="@dimen/card_container_width"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/card_background"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="@dimen/card_padding">
+
+            <TextView
+                style="@style/TitleText"
+                android:text="@string/app_name"
+                app:fontFamily="@font/viga" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/material_text_button"
+                style="@style/OutlineButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/simon"/>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/card_container_inner_padding" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/sound_button"
+                style="@style/CardButton"
+                android:onClick="onMusicButtonClick"
+                android:layout_gravity="start"
+                android:src="@mipmap/sound_on_icon" />
+
+            <ImageButton
+                style="@style/CardButton"
+                android:onClick="onConfigurationClick"
+                android:layout_gravity="center"
+                android:src="@mipmap/settings_icon" />
+
+
+            <ImageButton
+                android:onClick="onScoreBoardClick"
+                style="@style/CardButton"
+                android:layout_gravity="end"
+                android:src="@mipmap/scoreboard_icon" />
+
+
+        </FrameLayout>
+    </LinearLayout>
+
+</FrameLayout>

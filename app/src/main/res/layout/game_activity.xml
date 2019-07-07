@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".main_activity">
+
+    <FrameLayout
+        android:id="@+id/topPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/top_bottom_panel_padding">
+
+        <LinearLayout
+            android:layout_gravity="start|center_vertical"
+            android:id="@+id/score_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                app:fontFamily="@font/viga"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/score_text_size"
+                android:text="@string/score_main_activity"/>
+            <Space
+                android:layout_width="4dp"
+                android:layout_height="match_parent" />
+            <TextView
+                android:id="@+id/scoreView"
+                app:fontFamily="@font/space_mono"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/score_text_size"
+                android:text="@string/default_score_main_activity"/>
+        </LinearLayout>
+
+        <ImageButton
+            android:layout_width="@dimen/imagebutton_width"
+            android:layout_height="@dimen/imagebutton_width"
+            android:src="@mipmap/pause_icon"
+            android:layout_gravity="end"
+            />
+    </FrameLayout>
+
+    <TableLayout
+        android:padding="@dimen/game_board_padding"
+        android:id="@+id/boardGame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </TableLayout>
+
+    <FrameLayout
+        android:id="@+id/bottomPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/pause_icon"
+            android:layout_gravity="end"
+            />
+    </FrameLayout>
+
+</LinearLayout>

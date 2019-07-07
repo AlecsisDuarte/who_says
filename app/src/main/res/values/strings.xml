@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Who Says?</string>
+    <string name="simon">Simon</string>
+    <string name="save">Save</string>
+
+    <!--Settings-->
+    <string name="settings_title">Settings</string>
+    <string name="settings_content_game_size">Game Size</string>
+    <string name="settings_content_sound_fx">Sounds</string>
+    <string name="settings_content_sound_fx_description">Enables or disables the sound effects</string>
+
+    <string name="settings_content_game_size_normal">Normal</string>
+    <string name="settings_content_game_size_normal_description">A two by two grid</string>
+    <string name="settings_content_game_size_big">Big</string>
+    <string name="settings_content_game_size_big_description">A three by three grid</string>
+
+    <string name="settings_content_game_speed">Speed</string>
+    <string name="settings_content_game_speed_normal">Normal</string>
+    <string name="settings_content_game_speed_normal_description">Normal paced game</string>
+    <string name="settings_content_game_speed_fast">Fast</string>
+    <string name="settings_content_game_speed_fast_description">Fast paced game</string>
+    <string name="settings_content_game_speed_insane">Insane</string>
+    <string name="settings_content_game_speed_insane_description">Insane paced game</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="score_main_activity">Score:</string>
+    <string name="default_score_main_activity">0</string>
+
+</resources>
