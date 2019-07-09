@@ -5,15 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
-import android.media.MediaPlayer
 import android.media.SoundPool
-import android.net.Uri
 import android.os.Binder
 import android.os.Build
-import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import sh.now.alecsisduarte.who_says.R
+
+
 
 //Action Filters
 private const val ACTION_START: String = "sh.now.alecsisduarte.who_says.services.musicplayerservice.START"
@@ -48,6 +46,7 @@ private const val GRAY_SOUND = "GRAY_SOUND"
 private const val HIGH_SOUND = "HIGH_SOUND"
 private const val MIDDLE_SOUND = "MIDDLE_SOUND"
 private const val LOW_SOUND = "LOW_SOUND"
+private const val LOOSER_SOUND = "LOOSER_SOUND"
 
 private const val SOUND_ID = "SOUND_ID"
 private const val RESOURCE = "RESOURCE"
@@ -56,7 +55,7 @@ private const val RESOURCE = "RESOURCE"
 class MusicPlayerService : Service() {
 
     //Sounds Index
-    private var MUSIC_METADATA = mutableMapOf(
+    private var musicMetadata = mutableMapOf(
         BACKGROUND_MUSIC to mutableMapOf(SOUND_ID to 0, RESOURCE to R.raw.background_music),
         BUTTON_SOUND to mutableMapOf(SOUND_ID to 0, RESOURCE to R.raw.button_sound),
         YELLOW_SOUND to mutableMapOf(SOUND_ID to 0, RESOURCE to R.raw.yellow_note),
@@ -70,7 +69,8 @@ class MusicPlayerService : Service() {
         GRAY_SOUND to mutableMapOf(SOUND_ID to 0, RESOURCE to R.raw.gray_note),
         HIGH_SOUND to mutableMapOf(SOUND_ID to 0, RESOURCE to R.raw.high_note),
         MIDDLE_SOUND to mutableMapOf(SOUND_ID to 0, RESOURCE to R.raw.middle_note),
-        LOW_SOUND to mutableMapOf(SOUND_ID to 0, RESOURCE to R.raw.low_note)
+        LOW_SOUND to mutableMapOf(SOUND_ID to 0, RESOURCE to R.raw.low_note),
+        LOOSER_SOUND to mutableMapOf(SOUND_ID to 0, RESOURCE to R.raw.looser_note)
     )
 
     private var mSoundPool: SoundPool? = null
@@ -120,7 +120,7 @@ class MusicPlayerService : Service() {
         } else {
             SoundPool(1, AudioManager.STREAM_MUSIC, 0)
         }
-        MUSIC_METADATA.map {
+        musicMetadata.map {
             it.value[SOUND_ID] = mSoundPool!!.load(applicationContext, it.value[RESOURCE]!!, PRIORITY)
         }
     }
@@ -128,65 +128,28 @@ class MusicPlayerService : Service() {
     fun onActionStart(startMusic: Boolean = false) {
         if (mSoundPool == null) {
             initializeSoundPool()
-        }
-        if (startMusic) {
-            mSoundPool?.setOnLoadCompleteListener { soundPool: SoundPool, sampleId: Int, status: Int ->
-                MUSIC_METADATA[BACKGROUND_MUSIC]?.let {
-                    if (it[SOUND_ID]!! == sampleId && status == 0) {
-                        onActionPlayMusic()
+
+            if (startMusic) {
+                mSoundPool?.setOnLoadCompleteListener { soundPool: SoundPool, sampleId: Int, status: Int ->
+                    musicMetadata[BACKGROUND_MUSIC]?.let {
+                        if (it[SOUND_ID]!! == sampleId && status == 0) {
+                            onActionPlayMusic()
+                        }
                     }
                 }
             }
+        } else if (startMusic) {
+            onActionPlayMusic()
         }
     }
 
     //Music Actions
     fun onActionPauseMusic() {
-        onActionPauseSound(BACKGROUND_MUSIC)
+        onActionPauseSound()
     }
 
     fun onActionPlayMusic() {
         onActionPlaySound(BACKGROUND_MUSIC, INFINITE_LOOP)
-    }
-
-    fun onActionButtonSound() {
-        onActionPlaySound(BUTTON_SOUND)
-    }
-
-    fun onActionYellowButton() {
-        onActionPlaySound(YELLOW_SOUND)
-    }
-
-    fun onActionRedButton() {
-        onActionPlaySound(RED_SOUND)
-    }
-
-    fun onActionBlueButton() {
-        onActionPlaySound(BLUE_SOUND)
-    }
-
-    fun onActionGreenButton() {
-        onActionPlaySound(GREEN_SOUND)
-    }
-
-    fun onActionOrangeButton() {
-        onActionPlaySound(ORANGE_SOUND)
-    }
-
-    fun onActionPurpleButton() {
-        onActionPlaySound(PURPLE_SOUND)
-    }
-
-    fun onActionTealButton() {
-        onActionPlaySound(TEAL_SOUND)
-    }
-
-    fun onActionGrayButton() {
-        onActionPlaySound(GRAY_SOUND)
-    }
-
-    fun onActionLimeButton() {
-        onActionPlaySound(LIME_SOUND)
     }
 
 
@@ -196,7 +159,7 @@ class MusicPlayerService : Service() {
     }
 
     fun onActionPlaySound(soundName: String, loop: Int = NO_LOOP) {
-        MUSIC_METADATA[soundName]?.let {
+        musicMetadata[soundName]?.let {
             val soundId: Int = it[SOUND_ID]!!
             if (mSoundPool == null) {
                 initializeSoundPool()
@@ -208,7 +171,7 @@ class MusicPlayerService : Service() {
         }
     }
 
-    fun onActionPauseSound(soundName: String) {
+    fun onActionPauseSound() {
         musicStreamId?.let {
             mSoundPool?.pause(it)
         }
@@ -218,6 +181,7 @@ class MusicPlayerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         mSoundPool?.release()
+        mSoundPool = null
     }
 
     companion object {
@@ -228,25 +192,25 @@ class MusicPlayerService : Service() {
                 putExtra(START_MUSIC, start)
             }
 
-            context.startService(intent)
+            startService(context, intent)
         }
 
         @JvmStatic
         fun pauseMusic(context: Context) {
             val intent = Intent(context, MusicPlayerService::class.java).apply { action = ACTION_PAUSE }
-            context.startService(intent)
+            startService(context, intent)
         }
 
         @JvmStatic
         fun playMusic(context: Context) {
             val intent = Intent(context, MusicPlayerService::class.java).apply { action = ACTION_PLAY }
-            context.startService(intent)
+            startService(context, intent)
         }
 
         @JvmStatic
         fun stopMusic(context: Context) {
             val intent = Intent(context, MusicPlayerService::class.java).apply { action = ACTION_STOP }
-            context.startService(intent)
+            startService(context, intent)
         }
 
         @JvmStatic
@@ -255,6 +219,12 @@ class MusicPlayerService : Service() {
                 action = ACTION_PLAY_SOUND
                 putExtra(SOUND_NAME, soundName)
             }
+            startService(context, intent)
+        }
+
+        @JvmStatic
+        private fun startService(context: Context, intent: Intent) {
+
             context.startService(intent)
         }
 
@@ -321,6 +291,11 @@ class MusicPlayerService : Service() {
         @JvmStatic
         fun playLowSound(context: Context) {
             playSound(context, LOW_SOUND)
+        }
+
+        @JvmStatic
+        fun playLooserSound(context: Context) {
+            playSound(context, LOOSER_SOUND)
         }
 
     }

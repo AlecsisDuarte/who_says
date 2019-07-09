@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fafafa"
+    android:orientation="vertical"
+    android:keepScreenOn="true"
+    tools:context=".GameBoardActivity">
+
+    <FrameLayout
+        android:id="@+id/topPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/top_bottom_panel_padding">
+
+        <LinearLayout
+            android:id="@+id/score_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="start|center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:text="@string/score_main_activity"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:textSize="@dimen/score_text_size"
+                app:fontFamily="@font/viga" />
+
+            <TextView
+                android:id="@+id/scoreView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="@string/default_score_main_activity"
+                android:textSize="@dimen/score_text_size"
+                app:fontFamily="@font/space_mono" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/player_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal|center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="@string/turn"
+                android:textSize="@dimen/score_text_size"
+                app:fontFamily="@font/viga" />
+
+            <!--<Space-->
+                <!--android:layout_width="4dp"-->
+                <!--android:layout_height="match_parent" />-->
+
+            <TextView
+                android:id="@+id/playerView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="@string/simon"
+                android:textSize="@dimen/score_text_size"
+                app:fontFamily="@font/space_mono" />
+        </LinearLayout>
+
+        <ImageButton
+            style="@style/CardButton"
+            android:layout_gravity="end"
+            android:onClick="onPauseButtonClick"
+            android:src="@mipmap/pause_icon" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/boardGame"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ViewFlipper
+            android:id="@+id/gameBoardFlipper"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/game_board_padding">
+
+            <RelativeLayout
+                android:id="@+id/normalBoardLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <include layout="@layout/normal_board"/>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/bigBoardLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <include layout="@layout/big_board"/>
+            </RelativeLayout>
+
+        </ViewFlipper>
+
+    </FrameLayout>
+
+    <!--For any ads, not in use yet-->
+    <FrameLayout
+        android:id="@+id/bottomPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

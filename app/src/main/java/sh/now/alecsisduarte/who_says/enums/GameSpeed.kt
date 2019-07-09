@@ -1,5 +1,6 @@
 package sh.now.alecsisduarte.who_says.enums
 
-enum class GameSpeed(val score: Int) {
-    NORMAL(25), FAST(50), INSANE(100)
+enum class GameSpeed(val score: Int, val speed: Float) {
+    NORMAL(2, 2f), FAST(5, 4f), INSANE(10, 8f)
+
 }

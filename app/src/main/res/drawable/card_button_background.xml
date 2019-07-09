@@ -4,11 +4,11 @@
         <layer-list>
             <item>
                 <shape >
-                    <solid android:color="@color/card_shadow_color"/>
+                    <solid android:color="@color/card_button_shadow_color"/>
                     <corners android:radius="@dimen/card_border_radius"/>
                 </shape>
             </item>
-            <item android:bottom="@dimen/card_button_elevation_pressed">
+            <item android:bottom="@dimen/card_button_elevation_pressed_down" android:left="@dimen/card_button_elevation_pressed_left">
                 <shape android:shape="rectangle">
                     <solid android:color="@color/card_button_background_pressed"/>
                     <corners android:radius="@dimen/card_border_radius"/>
@@ -23,11 +23,11 @@
         <layer-list>
             <item>
                 <shape >
-                    <solid android:color="@color/card_shadow_color"/>
+                    <solid android:color="@color/card_button_shadow_color"/>
                     <corners android:radius="@dimen/card_border_radius"/>
                 </shape>
             </item>
-            <item android:bottom="@dimen/card_button_elevation">
+            <item android:bottom="@dimen/card_button_elevation_down" android:left="@dimen/card_button_elevation_left">
                 <shape android:shape="rectangle">
                     <solid android:color="@color/card_button_background_color"/>
                     <corners android:radius="@dimen/card_border_radius"/>

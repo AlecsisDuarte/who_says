@@ -7,7 +7,7 @@
 
     <!--Main Activity-->
     <dimen name="top_bottom_panel_padding">8dp</dimen>
-    <dimen name="score_text_size">20sp</dimen>
+    <dimen name="score_text_size">18sp</dimen>
     <dimen name="game_board_padding">8dp</dimen>
 
     <!--  Shared  -->
@@ -26,8 +26,10 @@
     <!--Card button-->
     <dimen name="card_button_width">60dp</dimen>
     <dimen name="card_button_height">60dp</dimen>
-    <dimen name="card_button_elevation">4dp</dimen>
-    <dimen name="card_button_elevation_pressed">2dp</dimen>
+    <dimen name="card_button_elevation_down">4dp</dimen>
+    <dimen name="card_button_elevation_pressed_down">2dp</dimen>
+    <dimen name="card_button_elevation_left">2dp</dimen>
+    <dimen name="card_button_elevation_pressed_left">0dp</dimen>
 
     <!--Dialogs-->
     <dimen name="dialog_width">300dp</dimen>
