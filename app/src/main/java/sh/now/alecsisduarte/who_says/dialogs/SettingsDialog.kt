@@ -2,17 +2,22 @@ package sh.now.alecsisduarte.who_says.dialogs
 
 import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.RadioButton
 import android.widget.Switch
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import kotlinx.android.synthetic.main.pause_dialog.*
 import kotlinx.android.synthetic.main.settings_dialog.*
-import sh.now.alecsisduarte.who_says.R
+import sh.now.alecsisduarte.who_says.*
 import sh.now.alecsisduarte.who_says.dialogs.SettingsDialog.SettingsDialogListener
 import sh.now.alecsisduarte.who_says.enums.GameSpeed
 import sh.now.alecsisduarte.who_says.enums.GridSize
@@ -27,6 +32,7 @@ class SettingsDialog : DialogFragment() {
     private lateinit var gridSize: GridSize
     private lateinit var gameSpeed: GameSpeed
     private var soundOn: Boolean = false
+    private var isActive: Boolean = true
 
     private lateinit var listener: SettingsDialogListener
 
@@ -36,11 +42,18 @@ class SettingsDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         arguments!!.let {
             gridSize = GridSize.valueOf(it.getString(GRID_SIZE, GridSize.NORMAL.name))
             gameSpeed = GameSpeed.valueOf(it.getString(GAME_SPEED, GameSpeed.FAST.name))
             soundOn = it.getBoolean(SOUND_ON)
+        }
+
+        dialog?.let { d: Dialog ->
+            d.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            d.window?.let { w: Window ->
+                w.setBackgroundDrawableResource(R.color.colorTransparent)
+            }
+
         }
 
         loadGameSpeed()
@@ -58,9 +71,10 @@ class SettingsDialog : DialogFragment() {
         if (context is SettingsDialogListener) {
             listener = context
         } else {
-            throw ClassCastException("$context.packageName must implement SettingsDialogListener's onSavedSettingsDialog")
+            throw ClassCastException("${context.packageName} must implement SettingsDialogListener's onSavedSettingsDialog")
         }
     }
+
 
     private fun loadGameSpeed() {
         when (gameSpeed) {
@@ -89,7 +103,7 @@ class SettingsDialog : DialogFragment() {
         soundSwitch.setOnClickListener { view: View -> onSoundOnSwitchClick(view) }
     }
 
-    fun onGridSizeRadioButtonClick(view: View) {
+    private fun onGridSizeRadioButtonClick(view: View) {
         val radioButton = view as RadioButton
         gridSize = when (radioButton) {
             normalSizeRadioButton -> {
@@ -104,7 +118,7 @@ class SettingsDialog : DialogFragment() {
         }
     }
 
-    fun onGameSpeedRadioButtonClick(view: View) {
+    private fun onGameSpeedRadioButtonClick(view: View) {
         val radioButton = view as RadioButton
         gameSpeed = when (radioButton) {
             fastSpeedRadioButton -> {
@@ -123,7 +137,7 @@ class SettingsDialog : DialogFragment() {
         }
     }
 
-    fun onSoundOnSwitchClick(view: View) {
+    private fun onSoundOnSwitchClick(view: View) {
         val switch = view as Switch
         if (switch.isChecked) {
             MusicPlayerService.playHighSound(requireContext())
@@ -132,34 +146,43 @@ class SettingsDialog : DialogFragment() {
         soundOn = switch.isChecked
     }
 
-    fun onSaveButtonClick(view: View) {
-        makeLowSound()
+    private fun onSaveButtonClick(view: View) {
+        makeButtonSound()
         listener.onSavedSettingsDialog(gridSize, gameSpeed, soundOn)
         this.dismiss()
     }
 
-    fun makeButtonSound() {
+    fun isActive(): Boolean {
+        return isActive
+    }
+
+    private fun makeButtonSound() {
         if (soundOn) {
             MusicPlayerService.playButtonSound(requireContext())
         }
     }
 
-    fun makeLowSound() {
+    private fun makeLowSound() {
         if (soundOn) {
             MusicPlayerService.playLowSound(requireContext())
         }
     }
 
-    fun makeHighSound() {
+    private fun makeHighSound() {
         if (soundOn) {
             MusicPlayerService.playHighSound(requireContext())
         }
     }
 
-    fun makeMiddleSound() {
+    private fun makeMiddleSound() {
         if (soundOn) {
             MusicPlayerService.playMiddleSound(requireContext())
         }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        isActive = false
     }
 
     interface SettingsDialogListener {
@@ -169,14 +192,23 @@ class SettingsDialog : DialogFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(fragmentManager: FragmentManager, gridSize: GridSize, gameSpeed: GameSpeed, soundOn: Boolean) {
-            SettingsDialog().apply {
+        fun newInstance(
+            fragmentManager: FragmentManager,
+            gridSize: GridSize,
+            gameSpeed: GameSpeed,
+            soundOn: Boolean
+        ): SettingsDialog {
+            val sd = SettingsDialog().apply {
                 arguments = Bundle().apply {
                     putString(GRID_SIZE, gridSize.name)
                     putString(GAME_SPEED, gameSpeed.name)
                     putBoolean(SOUND_ON, soundOn)
                 }
-            }.show(fragmentManager, SettingsDialog::class.java.simpleName)
+            }
+            sd.showNow(fragmentManager, SettingsDialog::class.java.simpleName)
+            return sd
+
+
         }
     }
 }

@@ -1,7 +1,20 @@
 <resources>
     <string name="app_name">Who Says?</string>
     <string name="simon">Simon</string>
+    <string name="continue_button">Continue</string>
     <string name="save">Save</string>
+    <string name="pause">Pause</string>
+    <string name="accept">Acept</string>
+    <string name="cancel">Cancel</string>
+    <string name="turn">Turn</string>
+    <string name="no_scoreboard">No scoreboard implementation yet</string>
+
+    <string name="you_want_to_replay">Retry?</string>
+    <string name="you_want_to_replay_description">You lost, do you want to play again?</string>
+
+    <string name="goind_home">Home</string>
+    <string name="going_home_description">Do you want to return? You will loose your current score</string>
+
 
     <!--Settings-->
     <string name="settings_title">Settings</string>
@@ -22,10 +35,19 @@
     <string name="settings_content_game_speed_insane">Insane</string>
     <string name="settings_content_game_speed_insane_description">Insane paced game</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
-    <string name="score_main_activity">Score:</string>
+    <string name="score_main_activity">Score</string>
     <string name="default_score_main_activity">0</string>
+
+    <!--Simon Says Buttons Descriptions-->
+    <string name="simon_yellow_button_description">Yellow button</string>
+    <string name="simon_blue_button_description">Blue button</string>
+    <string name="simon_red_button_description">Red button</string>
+    <string name="simon_green_button_description">Green button</string>
+    <string name="simon_teal_button_description">Teal button</string>
+    <string name="simon_lime_button_description">Lime button</string>
+    <string name="simon_orange_button_description">Orange button</string>
+    <string name="simon_purple_button_description">Purple button</string>
+    <string name="simon_gray_button_description">Gray button</string>
+    <string name="your_turn">Yours</string>
 
 </resources>

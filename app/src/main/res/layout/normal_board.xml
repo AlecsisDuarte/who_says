@@ -10,15 +10,17 @@
         android:layout_weight="1">
 
         <ImageButton
-            android:id="@+id/yellowButton"
-            style="@style/YellowSimonButton" />
+            android:id="@+id/normalYellowButton"
+            style="@style/YellowSimonButton"
+            android:contentDescription="@string/simon_yellow_button_description" />
 
         <Space
             android:layout_width="@dimen/simon_buttons_separation"
             android:layout_height="match_parent" />
 
         <ImageButton
-            android:id="@+id/redButton"
+            android:contentDescription="@string/simon_red_button_description"
+            android:id="@+id/normalRedButton"
             style="@style/RedSimonButton" />
     </LinearLayout>
     <Space android:layout_height="@dimen/simon_buttons_separation" android:layout_width="match_parent"/>
@@ -29,7 +31,8 @@
         android:layout_weight="1">
 
         <ImageButton
-            android:id="@+id/greenButton"
+            android:contentDescription="@string/simon_green_button_description"
+            android:id="@+id/normalGreenButton"
             style="@style/GreenSimonButton" />
 
         <Space
@@ -37,7 +40,8 @@
             android:layout_height="match_parent" />
 
         <ImageButton
-            android:id="@+id/blueButton"
+            android:contentDescription="@string/simon_blue_button_description"
+            android:id="@+id/normalBlueButton"
             style="@style/BlueSimonButton" />
     </LinearLayout>
 

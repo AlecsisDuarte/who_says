@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageButton
+            android:contentDescription="@string/simon_yellow_button_description"
+            android:id="@+id/bigYellowButton"
+            style="@style/YellowSimonButton" />
+
+        <Space
+            android:layout_width="@dimen/simon_buttons_separation"
+            android:layout_height="match_parent" />
+
+        <ImageButton
+            android:contentDescription="@string/simon_orange_button_description"
+            android:id="@+id/bigOrangeButton"
+            style="@style/OrangeSimonButton" />
+        <Space
+            android:layout_width="@dimen/simon_buttons_separation"
+            android:layout_height="match_parent" />
+
+        <ImageButton
+            android:contentDescription="@string/simon_red_button_description"
+            android:id="@+id/bigRedButton"
+            style="@style/RedSimonButton" />
+    </LinearLayout>
+    <Space android:layout_height="@dimen/simon_buttons_separation" android:layout_width="match_parent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageButton
+            android:contentDescription="@string/simon_lime_button_description"
+            android:id="@+id/bigLimeButton"
+            style="@style/LimeSimonButton" />
+
+        <Space
+            android:layout_width="@dimen/simon_buttons_separation"
+            android:layout_height="match_parent" />
+
+        <ImageButton
+            android:contentDescription="@string/simon_gray_button_description"
+            android:id="@+id/bigGrayButton"
+            style="@style/GraySimonButton" />
+        <Space
+            android:layout_width="@dimen/simon_buttons_separation"
+            android:layout_height="match_parent" />
+
+        <ImageButton
+            android:id="@+id/bigPurpleButton"
+            android:contentDescription="@string/simon_purple_button_description"
+            style="@style/PurpleSimonButton" />
+    </LinearLayout>
+    <Space android:layout_height="@dimen/simon_buttons_separation" android:layout_width="match_parent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageButton
+            android:contentDescription="@string/simon_green_button_description"
+            android:id="@+id/bigGreenButton"
+            style="@style/GreenSimonButton" />
+
+        <Space
+            android:layout_width="@dimen/simon_buttons_separation"
+            android:layout_height="match_parent" />
+
+        <ImageButton
+            android:contentDescription="@string/simon_teal_button_description"
+            android:id="@+id/bigTealButton"
+            style="@style/TealSimonButton" />
+
+        <Space
+            android:layout_width="@dimen/simon_buttons_separation"
+            android:layout_height="match_parent" />
+
+        <ImageButton
+            android:contentDescription="@string/simon_blue_button_description"
+            android:id="@+id/bigBlueButton"
+            style="@style/BlueSimonButton" />
+    </LinearLayout>
+
+</LinearLayout>

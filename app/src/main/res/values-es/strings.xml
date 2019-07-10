@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">¿Quien dice?</string>
+    <string name="accept">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="continue_button">Continuar</string>
+    <string name="default_score_main_activity">0</string>
+    <string name="goind_home">Inicio</string>
+    <string name="going_home_description">¿Deseas volver al inicio? Perderas tu puntuaje actual</string>
+    <string name="no_scoreboard">Puntaje no implementado</string>
+    <string name="pause">Pausa</string>
+    <string name="save">Guardar</string>
+    <string name="score_main_activity">Puntos</string>
+    <string name="settings_content_game_size">Tamaño</string>
+    <string name="settings_content_game_size_big">Grande</string>
+    <string name="settings_content_game_size_big_description">Grid de tres por tres</string>
+    <string name="settings_content_game_size_normal">Normal</string>
+    <string name="settings_content_game_size_normal_description">Grid de dos por dos</string>
+    <string name="settings_content_game_speed">Velocidad</string>
+    <string name="settings_content_game_speed_fast">Rapida</string>
+    <string name="settings_content_game_speed_fast_description">Velocidad rapida</string>
+    <string name="settings_content_game_speed_insane">Locura</string>
+    <string name="settings_content_game_speed_insane_description">Velocidad loca</string>
+    <string name="settings_content_game_speed_normal">Normal</string>
+    <string name="settings_content_game_speed_normal_description">Velocidad normal</string>
+    <string name="settings_content_sound_fx">Sonidos</string>
+    <string name="settings_content_sound_fx_description">Permite o no los effectos de sonido</string>
+    <string name="settings_title">Opciones</string>
+    <string name="simon">Simon</string>
+    <string name="simon_blue_button_description">Boton Azul</string>
+    <string name="simon_gray_button_description">Boton Gris</string>
+    <string name="simon_green_button_description">Boton verde</string>
+    <string name="simon_lime_button_description">Boton lima</string>
+    <string name="simon_orange_button_description">Boton nararanja</string>
+    <string name="simon_purple_button_description">Boton morado</string>
+    <string name="simon_red_button_description">Boton rojo</string>
+    <string name="simon_teal_button_description">Boton teal</string>
+    <string name="simon_yellow_button_description">Boton amarillo</string>
+    <string name="turn">Turno</string>
+    <string name="you_want_to_replay">¿Volver a intentar?</string>
+    <string name="you_want_to_replay_description">Perdiste, ¿Deseas volver a jugar?</string>
+    <string name="your_turn">Tuyo</string>
+</resources>

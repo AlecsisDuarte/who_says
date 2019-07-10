@@ -6,44 +6,33 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
+import android.widget.Toast
 import androidx.core.content.edit
 import androidx.fragment.app.FragmentManager
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.main_activity.sound_button
+import kotlinx.coroutines.*
 import sh.now.alecsisduarte.who_says.dialogs.SettingsDialog
 import sh.now.alecsisduarte.who_says.enums.GameSpeed
 import sh.now.alecsisduarte.who_says.enums.GridSize
 import sh.now.alecsisduarte.who_says.services.MusicPlayerService
 
-val SHARED_PREF_NAME = "CONFIGURATION"
-val CONFIG_GRID_SIZE = "GRID_SIZE"
-val CONFIG_SOUND_ON = "SOUND_ON"
-val CONFIG_MUSIC_ON = "MUSIC_ON"
-val CONFIG_GAME_SPEED = "GAME_SPEED"
+const val SHARED_PREF_NAME = "CONFIGURATION"
+const val CONFIG_GRID_SIZE = "GRID_SIZE"
+const val CONFIG_SOUND_ON = "SOUND_ON"
+const val CONFIG_MUSIC_ON = "MUSIC_ON"
+const val CONFIG_GAME_SPEED = "GAME_SPEED"
 
 class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener {
-
-    private lateinit var mMusicPlayerService: MusicPlayerService
-    private var mMusicPlayerBound = false
 
     private lateinit var gridSize: GridSize
     private lateinit var gameSpeed: GameSpeed
     private var musicOn: Boolean = true
     private var soundOn: Boolean = true
 
-    private val musicPlayerConnection = object : ServiceConnection {
-        override fun onServiceDisconnected(p0: ComponentName?) {
-            mMusicPlayerService.onActionStop()
-            mMusicPlayerBound = false
-        }
+    private var settingsDialog: SettingsDialog? = null
+    private var goingToGame = false
 
-        override fun onServiceConnected(className: ComponentName?, service: IBinder?) {
-            val binder = service as MusicPlayerService.MusicPlayerBinder
-            mMusicPlayerService = binder.getService()
-            mMusicPlayerBound = true
-            mMusicPlayerService.onActionStart(musicOn)
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,11 +41,9 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
         getConfiguration()
         setBackgroundAnimation()
         changeSoundButtonImage()
-
-        MusicPlayerService.startMusic(this, musicOn)
     }
 
-    fun getConfiguration() {
+    private fun getConfiguration() {
         val sp: SharedPreferences = baseContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
         gridSize = GridSize.valueOf(sp.getString(CONFIG_GRID_SIZE, GridSize.NORMAL.name)!!)
         gameSpeed = GameSpeed.valueOf(sp.getString(CONFIG_GAME_SPEED, GameSpeed.NORMAL.name)!!)
@@ -65,34 +52,39 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
 
     }
 
-    fun setBackgroundAnimation() {
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+    private fun setBackgroundAnimation() {
         val animBackground = backgroundLayout.background!! as AnimationDrawable
         animBackground.setEnterFadeDuration(10)
-        animBackground.setExitFadeDuration(5000)
+        animBackground.setExitFadeDuration(2500)
         animBackground.start()
     }
 
-    fun buttonSoundEffect() {
+    private fun buttonSoundEffect() = runBlocking {
         if (soundOn) {
-            MusicPlayerService.playButtonSound(this)
+            GlobalScope.launch {
+                MusicPlayerService.playButtonSound(applicationContext)
+            }
         }
     }
 
-    fun changeSoundButtonImage() {
-        if (musicOn) {
-            sound_button.setImageResource(R.mipmap.sound_on_icon)
-        } else {
-            sound_button.setImageResource(R.mipmap.volume_off_icon)
+    private fun changeSoundButtonImage() = runBlocking {
+        GlobalScope.async(Dispatchers.Main) {
+            if (musicOn) {
+                sound_button.setImageResource(R.mipmap.music_on_icon)
+            } else {
+                sound_button.setImageResource(R.mipmap.music_off_icon)
+            }
         }
     }
 
-    fun toggleMusic() {
+    private fun toggleMusic() {
+//        GlobalScope.async(Dispatchers.Default) {
         if (musicOn) {
-            MusicPlayerService.playMusic(this)
+            MusicPlayerService.playMusic(applicationContext)
         } else {
-            MusicPlayerService.pauseMusic(this)
+            MusicPlayerService.pauseMusic(applicationContext)
         }
+//        }
     }
 
     //Events
@@ -110,12 +102,24 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
 
     fun onScoreBoardClick(view: View) {
         buttonSoundEffect()
+        Toast.makeText(this, R.string.no_scoreboard, Toast.LENGTH_SHORT).show()
     }
 
     fun onConfigurationClick(view: View) {
-        buttonSoundEffect()
-        val fm: FragmentManager = supportFragmentManager
-        SettingsDialog.newInstance(fm, gridSize, gameSpeed, soundOn)
+        if (settingsDialog == null || !settingsDialog!!.isActive()) {
+            buttonSoundEffect()
+            val fm: FragmentManager = supportFragmentManager
+            settingsDialog = SettingsDialog.newInstance(fm, gridSize, gameSpeed, soundOn)
+        }
+    }
+
+    fun onSimonButtonClick(view: View) {
+        if (settingsDialog == null || !settingsDialog!!.isActive() && !goingToGame) {
+            goingToGame = true
+            buttonSoundEffect()
+            startActivity(Intent(this, GameBoardActivity::class.java))
+
+        }
     }
 
     override fun onSavedSettingsDialog(gridSize: GridSize, gameSpeed: GameSpeed, soundOn: Boolean) {
@@ -133,9 +137,9 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
 
     override fun onResume() {
         super.onResume()
-        if (musicOn) {
-            MusicPlayerService.playMusic(this)
-        }
+//        getConfiguration()
+        goingToGame = false
+        MusicPlayerService.startMusic(this, musicOn)
     }
 
     override fun onPause() {
