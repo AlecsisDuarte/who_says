@@ -1,4 +1,4 @@
-package sh.now.alecsisduarte.who_says.utils
+package sh.now.alecsisduart.who_says.utils
 
 import android.content.Context
 import androidx.appcompat.app.AlertDialog
@@ -6,7 +6,7 @@ import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import sh.now.alecsisduarte.who_says.R
+import sh.now.alecsisduart.who_says.R
 import java.lang.Exception
 
 class ExceptionUtils {

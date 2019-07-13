@@ -1,36 +1,40 @@
-package sh.now.alecsisduarte.who_says
+package sh.now.alecsisduart.who_says
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.big_board.*
 import kotlinx.android.synthetic.main.game_board_activity.*
 import kotlinx.android.synthetic.main.normal_board.*
 import kotlinx.coroutines.*
-import sh.now.alecsisduarte.who_says.bots.SimonBot
-import sh.now.alecsisduarte.who_says.dialogs.ConfirmDialog
-import sh.now.alecsisduarte.who_says.dialogs.PauseDialog
+import sh.now.alecsisduart.who_says.bots.SimonBot
+import sh.now.alecsisduart.who_says.dialogs.ConfirmDialog
+import sh.now.alecsisduart.who_says.dialogs.PauseDialog
 
-import sh.now.alecsisduarte.who_says.enums.GridSize
-import sh.now.alecsisduarte.who_says.enums.GameSpeed
-import sh.now.alecsisduarte.who_says.services.MusicPlayerService
+import sh.now.alecsisduart.who_says.enums.GridSize
+import sh.now.alecsisduart.who_says.helpers.ConfigurationHelper
+import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
+import sh.now.alecsisduart.who_says.services.MusicPlayerService
 
 const val RETURN_HOME_DIALOG_ID = 1
 private const val RETRY_GAME_DIALOG_ID = 2
 private const val MAX_SPEED = 10f
 
+private const val TAG = "GameBoardActivity"
+
 class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, SimonBot.SimonBotListener,
     ConfirmDialog.ConfirmDialogListener {
 
-    private lateinit var gridSize: GridSize
-    private lateinit var gameSpeed: GameSpeed
-    private var soundOn: Boolean = true
+    private lateinit var mMusicPlayerHelper: MusicPlayerHelper
+    private lateinit var mConfigurationHelper: ConfigurationHelper
+
+    //Flag to know if we need to restart the game
     private var gameSettingsChanged = false
 
     //Game values
@@ -38,22 +42,19 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     private var steps: Int = 1
     private var speed: Float = 1f
 
-    private lateinit var simonBot: SimonBot
+
+    //Animations Durations
+    private var shortAnimationDuration: Int = 0
+    private var longAnimationDuration: Int = 0
+    private var mediumAnimationDuration: Int = 0
+
+    //Job that handles random button pressing (hovering)
+    private var simonBot: SimonBot? = null
 
     //Buttons metadata
-    private lateinit var gameButtons: List<ImageButton>
-
-    private val buttonsSounds: List<(Context) -> Unit> = listOf(
-        { context: Context -> MusicPlayerService.playYellowButton(context) },
-        { context: Context -> MusicPlayerService.playRedButton(context) },
-        { context: Context -> MusicPlayerService.playGreenButton(context) },
-        { context: Context -> MusicPlayerService.playBlueButton(context) },
-        { context: Context -> MusicPlayerService.playOrangeButton(context) },
-        { context: Context -> MusicPlayerService.playLimeButton(context) },
-        { context: Context -> MusicPlayerService.playGrayButton(context) },
-        { context: Context -> MusicPlayerService.playPurpleButton(context) },
-        { context: Context -> MusicPlayerService.playTealButton(context) }
-    )
+    private lateinit var buttonsIds: Map<ImageButton, Int>
+    private lateinit var normalGridButtons: List<ImageButton>
+    private lateinit var bigGridButtons: List<ImageButton>
 
     private lateinit var pauseDialog: PauseDialog
     private var confirmDialog: ConfirmDialog? = null
@@ -67,95 +68,156 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.game_board_activity)
 
-        getConfiguration()
+        mConfigurationHelper = ConfigurationHelper.getInstance(this)
+        mMusicPlayerHelper = MusicPlayerHelper.getInstance(this)
 
         MusicPlayerService.startMusic(this, false)
 
-        if (gridSize == GridSize.BIG && gameBoardFlipper.displayedChild == 0) {
-            gameBoardFlipper.showNext()
+        if (mConfigurationHelper.gridSize == GridSize.BIG && gameBoardFlipper.displayedChild == 0) {
+            gameBoardFlipper.displayedChild = 1
         }
-        createButtonsArray()
 
+        initializeAnimationsDurations()
+        initializeButtonsReferences()
         restartGame()
+
+    }
+
+    private fun initializeButtonsReferences() {
+        bigGridButtons = listOf(
+            bigYellowButton,
+            bigRedButton,
+            bigGreenButton,
+            bigBlueButton,
+            bigOrangeButton,
+            bigLimeButton,
+            bigGrayButton,
+            bigPurpleButton,
+            bigTealButton
+        )
+        normalGridButtons = listOf(
+            normalYellowButton,
+            normalRedButton,
+            normalGreenButton,
+            normalBlueButton
+        )
+        buttonsIds = mapOf(
+            normalYellowButton to MusicPlayerHelper.YELLOW_BUTTON_ID,
+            bigYellowButton to MusicPlayerHelper.YELLOW_BUTTON_ID,
+            normalRedButton to MusicPlayerHelper.RED_BUTTON_ID,
+            bigRedButton to MusicPlayerHelper.RED_BUTTON_ID,
+            normalGreenButton to MusicPlayerHelper.GRAY_BUTTON_ID,
+            bigGreenButton to MusicPlayerHelper.GREEN_BUTTON_ID,
+            normalBlueButton to MusicPlayerHelper.BLUE_BUTTON_ID,
+            bigBlueButton to MusicPlayerHelper.BLUE_BUTTON_ID,
+            bigOrangeButton to MusicPlayerHelper.ORANGE_BUTTON_ID,
+            bigLimeButton to MusicPlayerHelper.LIME_BUTTON_ID,
+            bigGrayButton to MusicPlayerHelper.GRAY_BUTTON_ID,
+            bigPurpleButton to MusicPlayerHelper.PURPLE_BUTTON_ID,
+            bigTealButton to MusicPlayerHelper.TEAL_BUTTON_ID
+        )
+    }
+
+
+    private fun initializeAnimationsDurations() {
+        shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
+        mediumAnimationDuration = resources.getInteger(android.R.integer.config_mediumAnimTime)
+        longAnimationDuration = resources.getInteger(android.R.integer.config_longAnimTime)
     }
 
     //Loaders
-    private fun createButtonsArray() {
+    fun turnViewFadeOut() {
+        turnLabelId.apply {
+            alpha = 1f
+            visibility = View.VISIBLE
 
-        gameButtons = if (gridSize == GridSize.NORMAL) {
-            listOf(
-                normalYellowButton,
-                normalRedButton,
-                normalGreenButton,
-                normalBlueButton
-            )
-        } else {
-            listOf(
-                bigYellowButton,
-                bigRedButton,
-                bigGreenButton,
-                bigBlueButton,
-                bigOrangeButton,
-                bigLimeButton,
-                bigGrayButton,
-                bigPurpleButton,
-                bigTealButton
-            )
-        }
-    }
-
-    fun getConfiguration() {
-        baseContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE).let {
-            gridSize = GridSize.valueOf(it.getString(CONFIG_GRID_SIZE, GridSize.NORMAL.name)!!)
-            gameSpeed = GameSpeed.valueOf(it.getString(CONFIG_GAME_SPEED, GameSpeed.NORMAL.name)!!)
-            soundOn = it.getBoolean(CONFIG_SOUND_ON, true)
+            animate()
+                .alpha(0f)
+                .duration = shortAnimationDuration.toLong()
         }
 
     }
 
-    fun saveConfiguration() {
-        applicationContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE).let { sp: SharedPreferences ->
-            sp.edit {
-                this.putString(CONFIG_GRID_SIZE, gridSize.name)
-                this.putString(CONFIG_GAME_SPEED, gameSpeed.name)
-                this.putBoolean(CONFIG_SOUND_ON, soundOn)
-                this.commit()
-            }
+    fun turnViewFadeIn() {
+        turnLabelId.apply {
+            alpha = 0f
+            visibility = View.VISIBLE
+
+            animate()
+                .alpha(1f)
+                .duration = shortAnimationDuration.toLong()
+
         }
+    }
+
+    fun changeTextViewColor(textView: TextView, colorId: Int) {
+        textView.setTextColor(ContextCompat.getColor(this, colorId))
+    }
+
+    fun readySetGoTextAnimation(onFinish: () -> Unit) = runBlocking {
+        GlobalScope.launch(Dispatchers.Main) {
+            val waitDuration = 600L
+            val firstTextView = turnSwitcher.getChildAt(0) as TextView
+            val secondTextView = turnSwitcher.getChildAt(1) as TextView
+            val originalColor = firstTextView.textColors
+
+            turnViewFadeOut()
+
+            changeTextViewColor(firstTextView, R.color.simon_red_dark)
+            turnSwitcher.displayedChild = 0
+            turnSwitcher.setCurrentText(getText(R.string.ready))
+            delay(waitDuration)
+
+            changeTextViewColor(secondTextView, R.color.simon_yellow_dark)
+            turnSwitcher.setText(getText(R.string.set))
+            delay(waitDuration)
+
+            changeTextViewColor(firstTextView, R.color.simon_green_dark)
+            turnSwitcher.setText(getText(R.string.go))
+            delay(waitDuration)
+
+            turnViewFadeIn()
+            turnSwitcher.setText(getText(R.string.simon))
+            secondTextView.setTextColor(originalColor)
+            firstTextView.setTextColor(originalColor)
+            delay(mediumAnimationDuration.toLong())
+
+            onFinish()
+        }
+
     }
 
     //Events
     fun onPauseButtonClick(view: View) {
-        makeButtonSound(this)
-        simonBot.suspend()
-
-        pauseDialog = PauseDialog.newInstance(gridSize, gameSpeed, soundOn)
-        pauseDialog.show(supportFragmentManager, PauseDialog::class.java.simpleName)
+        mMusicPlayerHelper.buttonSoundAsync()
+        simonBot?.suspend()
+        pauseDialog = PauseDialog.newInstance(supportFragmentManager)
 
     }
 
     fun onSimonButtonClick(view: View) {
         val imgbttn = view as ImageButton
-        simonButtonSound(imgbttn, this)
+        simonButtonSound(imgbttn)
 
         if (!isSimonTurn) {
-
+            val buttons = if (mConfigurationHelper.gridSize == GridSize.NORMAL) normalGridButtons else bigGridButtons
             val index = buttonsToPress[curButtonToPress]
-            if (gameButtons[index] == imgbttn) {
+            if (buttons[index] == imgbttn) {
                 ++curButtonToPress
                 //Already pressed all buttons
                 if (curButtonToPress == buttonsToPress.size) {
+                    isSimonTurn = true
                     curButtonToPress = 0
-                    curScore += (gameSpeed.score * gridSize.multiplier).toInt()
-                    val score = curScore.toString()
-                    scoreView.text = score
-                    Log.d("SCORE", score)
-                    playerView.text = getText(R.string.simon)
+                    mConfigurationHelper.let {
+                        curScore += (it.gameSpeed.score * it.gridSize.multiplier).toInt()
+                    }
+                    scoreSwitcher.setText(curScore.toString())
+                    turnSwitcher.setText(getText(R.string.simon))
                     initializeSimon(this)
                 }
             } else {
                 if (confirmDialog == null || !confirmDialog!!.isActive()) {
-                    makeLooserSound(this)
+                    mMusicPlayerHelper.looserSoundAsync()
                     confirmDialog = ConfirmDialog.newInstance(
                         supportFragmentManager,
                         getString(R.string.you_want_to_replay),
@@ -171,28 +233,44 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     //Actions
     private fun restartGame() {
         Log.d("SCORE", "restarted")
-        scoreView.text = getText(R.string.default_score_main_activity)
+        scoreSwitcher.setCurrentText(getText(R.string.default_score_main_activity))
         curScore = 0
 
         isSimonTurn = true
         steps = 1
-        speed = gameSpeed.speed
+        speed = mConfigurationHelper.gameSpeed.speed
         buttonsToPress = emptyArray()
 
-        playerView.text = getText(R.string.simon)
-        initializeSimon(this)
+        readySetGoTextAnimation {
+            initializeSimon(this)
+        }
+
+    }
+
+    private fun simonButtonSound(imageButton: ImageButton) {
+        buttonsIds[imageButton]?.let {
+            mMusicPlayerHelper.simonSoundAsync(it)
+        }
 
     }
 
     private fun initializeSimon(context: Context) {
-        simonBot = SimonBot(gameButtons, buttonsSounds, buttonsToPress, steps, speed, context, soundOn)
+        simonBot =
+            SimonBot(
+                if (mConfigurationHelper.gridSize == GridSize.BIG) bigGridButtons else normalGridButtons,
+                buttonsIds,
+                buttonsToPress,
+                speed,
+                context,
+                mConfigurationHelper.soundOn
+            )
         GlobalScope.async(Dispatchers.Default) {
-            simonBot.start()
+            simonBot?.start()
         }
     }
 
     private fun flipBoard() {
-        when (gridSize) {
+        when (mConfigurationHelper.gridSize) {
             GridSize.NORMAL -> {
                 if (gameBoardFlipper.displayedChild != 0) {
                     gameBoardFlipper.let {
@@ -224,29 +302,18 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         if (speed < MAX_SPEED) {
             speed += 0.1f
         }
-        while (simonBot.state() != SimonBot.JobState.FINISHED);
+        while (simonBot?.state() != SimonBot.JobState.FINISHED);
         isSimonTurn = false
-        playerView.text = getText(R.string.your_turn)
+        turnSwitcher.setText(getText(R.string.your_turn))
     }
 
-    override fun onSavedSettingsDialog(gridSize: GridSize, gameSpeed: GameSpeed, soundOn: Boolean) {
-        this.soundOn = soundOn
-
-        pauseDialog.updateValues(gridSize, gameSpeed, soundOn)
-
-        if (this.gridSize != gridSize) {
-            this.gridSize = gridSize
-            createButtonsArray()
+    override fun onSavedSettingsDialog(gridSizeChanged: Boolean, gameSpeedChanged: Boolean, soundOnChanged: Boolean) {
+        if (gridSizeChanged) {
             flipBoard()
             gameSettingsChanged = true
-        } else if (this.gameSpeed != gameSpeed) {
+        } else if (gameSpeedChanged) {
             gameSettingsChanged = true
         }
-
-        this.gameSpeed = gameSpeed
-
-        saveConfiguration()
-
     }
 
     override fun onConfirmDialogCancelClick(id: Int) {
@@ -254,8 +321,6 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
             RETRY_GAME_DIALOG_ID -> {
                 this.finish()
 
-            }
-            RETURN_HOME_DIALOG_ID -> {
             }
         }
     }
@@ -274,8 +339,8 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
 
     override fun onPause() {
         super.onPause()
-        if (simonBot.state() == SimonBot.JobState.SUSPEND) {
-            simonBot.resume()
+        if (simonBot?.state() == SimonBot.JobState.SUSPEND) {
+            simonBot?.resume()
         }
     }
 
@@ -294,44 +359,18 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     override fun onPauseDialogListenerResumeButtonClick() {
         if (gameSettingsChanged) {
             gameSettingsChanged = false
-            if (simonBot.state() == SimonBot.JobState.SUSPEND) {
-                simonBot.stop()
+            if (simonBot?.state() == SimonBot.JobState.SUSPEND) {
+                simonBot?.stop()
             }
             restartGame()
         } else {
-            if (simonBot.state() == SimonBot.JobState.SUSPEND) {
-                simonBot.resume()
+            if (simonBot?.state() == SimonBot.JobState.SUSPEND) {
+                simonBot?.resume()
             }
         }
     }
 
     override fun onPauseDialogListenerRestartButtonClick() {
         restartGame()
-    }
-
-    //Sounds
-    fun makeButtonSound(context: Context) = runBlocking {
-        if (soundOn) {
-            GlobalScope.async(Dispatchers.Default) {
-                MusicPlayerService.playButtonSound(context)
-            }
-        }
-    }
-
-    fun simonButtonSound(simonButton: ImageButton, context: Context) = runBlocking {
-        if (soundOn) {
-            GlobalScope.async(Dispatchers.Default) {
-                val index = gameButtons.indexOf(simonButton)
-                buttonsSounds[index](context)
-            }
-        }
-    }
-
-    fun makeLooserSound(context: Context) = runBlocking {
-        if (soundOn) {
-            GlobalScope.async(Dispatchers.Default) {
-                MusicPlayerService.playLooserSound(context)
-            }
-        }
     }
 }

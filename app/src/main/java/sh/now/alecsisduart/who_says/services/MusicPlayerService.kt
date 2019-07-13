@@ -1,4 +1,4 @@
-package sh.now.alecsisduarte.who_says.services
+package sh.now.alecsisduart.who_says.services
 
 import android.app.Service
 import android.content.Context
@@ -9,20 +9,20 @@ import android.media.SoundPool
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import sh.now.alecsisduarte.who_says.R
+import sh.now.alecsisduart.who_says.R
 
 
 
 //Action Filters
-private const val ACTION_START: String = "sh.now.alecsisduarte.who_says.services.musicplayerservice.START"
-private const val ACTION_PLAY: String = "sh.now.alecsisduarte.who_says.services.musicplayerservice.PLAY"
-private const val ACTION_PLAY_SOUND: String = "sh.now.alecsisduarte.who_says.services.musicplayerservice.PLAY_SOUND"
-private const val ACTION_STOP: String = "sh.now.alecsisduarte.who_says.services.musicplayerservice.STOP"
-private const val ACTION_PAUSE: String = "sh.now.alecsisduarte.who_says.services.musicplayerservice.PAUSE"
+private const val ACTION_START: String = "sh.now.alecsisduart.who_says.services.musicplayerservice.START"
+private const val ACTION_PLAY: String = "sh.now.alecsisduart.who_says.services.musicplayerservice.PLAY"
+private const val ACTION_PLAY_SOUND: String = "sh.now.alecsisduart.who_says.services.musicplayerservice.PLAY_SOUND"
+private const val ACTION_STOP: String = "sh.now.alecsisduart.who_says.services.musicplayerservice.STOP"
+private const val ACTION_PAUSE: String = "sh.now.alecsisduart.who_says.services.musicplayerservice.PAUSE"
 
 //Parameters Constants String
-private const val START_MUSIC: String = "sh.now.alecsisduarte.who_says.param.START_MUSIC"
-private const val SOUND_NAME: String = "sh.now.alecsisduarte.who_says.param.SOUND_NAME"
+private const val START_MUSIC: String = "sh.now.alecsisduart.who_says.param.START_MUSIC"
+private const val SOUND_NAME: String = "sh.now.alecsisduart.who_says.param.SOUND_NAME"
 
 //Player music default values
 private const val LEFT_VOLUME: Float = 1f //All Volume

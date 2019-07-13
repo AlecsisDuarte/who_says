@@ -1,16 +1,18 @@
-package sh.now.alecsisduarte.who_says.bots
+package sh.now.alecsisduart.who_says.bots
 
 import android.content.Context
+import android.media.Image
 import android.util.Log
 import android.widget.ImageButton
 import kotlinx.coroutines.*
-import sh.now.alecsisduarte.who_says.bots.SimonBot.JobState.*
+import sh.now.alecsisduart.who_says.bots.SimonBot.JobState.*
+import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
+import kotlin.math.max
 
 class SimonBot(
     private val buttons: List<ImageButton>,
-    private val sounds: List<(context: Context) -> Unit>,
+    private val buttonsIds: Map<ImageButton, Int>,
     private val previousPressedButtons: Array<Int>,
-    private val steps: Int,
     private val speed: Float,
     private val context: Context,
     private val soundOn: Boolean
@@ -19,6 +21,8 @@ class SimonBot(
     enum class JobState {
         RUNNING, SUSPEND, FINISHED
     }
+
+    private val mMusicPlayerHelper = MusicPlayerHelper.getInstance(context)
 
     private var job: Job? = null
     private var jobState: JobState = FINISHED
@@ -67,47 +71,55 @@ class SimonBot(
 
     private suspend fun startSimonBot() = withContext(Dispatchers.Default) {
         var step = 0
-        val buttonsPressed = Array(steps) { 0 }
+        val maxSteps = previousPressedButtons.size + 1
+        val buttonsToPress = Array(maxSteps) { 0 }
         val maxButtonIndex = buttons.size - 1
 
-        delay(800)
+
+        delay(400)
 
         while (step < previousPressedButtons.size) {
             while (jobState == SUSPEND);
             val index = previousPressedButtons[step]
             simonButtonHandling(index)
-            buttonsPressed[step++] = index
+            buttonsToPress[step++] = index
         }
 
-        while (step < steps) {
-            while (jobState == SUSPEND);
-            val index = (Math.random() * maxButtonIndex).toInt()
-            simonButtonHandling(index)
-            buttonsPressed[step++] = index
 
-        }
+        while (jobState == SUSPEND);
+
+        val index = (Math.random() * maxButtonIndex).toInt()
+        simonButtonHandling(index, true)
+        buttonsToPress[step] = index
 
         jobState = FINISHED
         launch(Dispatchers.Main) {
-            listener.onSimonBotFinished(buttonsPressed)
+            listener.onSimonBotFinished(buttonsToPress)
         }
     }
 
-    private suspend fun simonButtonHandling(index: Int) = withContext(Dispatchers.Default) {
-        if (soundOn) {
-            sounds[index](context)
-        }
-        GlobalScope.launch(Dispatchers.Main) {
-            buttons[index].isHovered = true
-            val delay = 250L
-            val calcDelay = (1000 / speed).toLong()
-            if (delay > calcDelay) {
-                calcDelay
+    private suspend fun simonButtonHandling(index: Int, isLast: Boolean = false) = withContext(Dispatchers.Default) {
+        val button = buttons[index]
+        val soundJob = GlobalScope.async {
+            if (soundOn) {
+                buttonsIds[button]?.let {
+                    mMusicPlayerHelper.simonSoundAsync(it)
+                }
             }
-            delay(delay)
+        }
+        val calcDelay = (1000 / speed).toLong()
+
+        val hoverJob = GlobalScope.async(Dispatchers.Main) {
+            buttons[index].isHovered = true
+            val delay = 100L
+            delay(max(delay, calcDelay))
             buttons[index].isHovered = false
         }
-        delay((1000 / speed).toLong())
+
+        awaitAll(soundJob, hoverJob)
+        if (!isLast) {
+            delay(calcDelay)
+        }
 
     }
 

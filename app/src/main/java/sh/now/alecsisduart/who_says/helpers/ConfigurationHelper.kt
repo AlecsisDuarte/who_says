@@ -1,16 +1,13 @@
-package sh.now.alecsisduarte.who_says.helpers
+package sh.now.alecsisduart.who_says.helpers
 
 import android.content.Context
 import android.content.SharedPreferences
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import sh.now.alecsisduarte.who_says.enums.GameSpeed
-import sh.now.alecsisduarte.who_says.enums.GridSize
-import sh.now.alecsisduarte.who_says.models.ConfigurationModel
-import sh.now.alecsisduarte.who_says.helpers.SharedPreferencesHelper.defaultPreferences
-import sh.now.alecsisduarte.who_says.helpers.SharedPreferencesHelper.get
-import sh.now.alecsisduarte.who_says.helpers.SharedPreferencesHelper.set
+import sh.now.alecsisduart.who_says.enums.GameSpeed
+import sh.now.alecsisduart.who_says.enums.GridSize
+import sh.now.alecsisduart.who_says.models.ConfigurationModel
+import sh.now.alecsisduart.who_says.helpers.SharedPreferencesHelper.defaultPreferences
+import sh.now.alecsisduart.who_says.helpers.SharedPreferencesHelper.get
+import sh.now.alecsisduart.who_says.helpers.SharedPreferencesHelper.set
 
 
 //SharedPreferences value keys

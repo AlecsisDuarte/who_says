@@ -1,4 +1,4 @@
-package sh.now.alecsisduarte.who_says.helpers
+package sh.now.alecsisduart.who_says.helpers
 
 import android.content.Context
 import android.content.SharedPreferences

@@ -1,4 +1,4 @@
-package sh.now.alecsisduarte.who_says.models
+package sh.now.alecsisduart.who_says.models
 
 class AccomplishmentsModel {
     var learningTheBasicsAchievement: Boolean = false

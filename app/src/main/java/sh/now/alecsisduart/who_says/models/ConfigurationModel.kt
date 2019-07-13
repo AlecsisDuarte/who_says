@@ -1,7 +1,7 @@
-package sh.now.alecsisduarte.who_says.models
+package sh.now.alecsisduart.who_says.models
 
-import sh.now.alecsisduarte.who_says.enums.GameSpeed
-import sh.now.alecsisduarte.who_says.enums.GridSize
+import sh.now.alecsisduart.who_says.enums.GameSpeed
+import sh.now.alecsisduart.who_says.enums.GridSize
 
 data class ConfigurationModel(
     var soundOn: Boolean = false,

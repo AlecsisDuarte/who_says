@@ -1,4 +1,4 @@
-package sh.now.alecsisduarte.who_says.dialogs
+package sh.now.alecsisduart.who_says.dialogs
 
 import android.app.Dialog
 import android.content.Context
@@ -11,7 +11,7 @@ import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import kotlinx.android.synthetic.main.confirm_dialog.*
-import sh.now.alecsisduarte.who_says.R
+import sh.now.alecsisduart.who_says.R
 
 private const val ID = "confirmdialog.param.id"
 private const val TITLE = "confirmdialog.param.title"

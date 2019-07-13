@@ -1,4 +1,4 @@
-package sh.now.alecsisduarte.who_says.dialogs
+package sh.now.alecsisduart.who_says.dialogs
 
 import android.app.Dialog
 import android.content.Context
@@ -8,27 +8,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import kotlinx.android.synthetic.main.pause_dialog.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
-import sh.now.alecsisduarte.who_says.R
-import sh.now.alecsisduarte.who_says.RETURN_HOME_DIALOG_ID
-import sh.now.alecsisduarte.who_says.enums.GameSpeed
-import sh.now.alecsisduarte.who_says.enums.GridSize
-import sh.now.alecsisduarte.who_says.services.MusicPlayerService
+import sh.now.alecsisduart.who_says.R
+import sh.now.alecsisduart.who_says.helpers.ConfigurationHelper
+import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
 import java.lang.ClassCastException
 
-private const val GRID_SIZE = "sh.now.alecsisduarte.who_says.settings.grid_size"
-private const val GAME_SPEED = "sh.now.alecsisduarte.who_says.settings.game_speed"
-private const val SOUND_ON = "sh.now.alecsisduarte.who_says.settings.sound_on"
+private const val TAG = "PauseDialog"
 
 class PauseDialog : DialogFragment() {
-
-    private lateinit var gridSize: GridSize
-    private lateinit var gameSpeed: GameSpeed
-    private var soundOn: Boolean = false
+    private lateinit var configurationHelper: ConfigurationHelper
+    private lateinit var musicPlayerHelper: MusicPlayerHelper
 
     private lateinit var listener: PauseDialogListener
 
@@ -44,51 +35,44 @@ class PauseDialog : DialogFragment() {
             d.window?.let { w: Window ->
                 w.setBackgroundDrawableResource(R.color.colorTransparent)
             }
-            d.setOnCancelListener { onPlayButtonClick(continueButton) }
+            d.setOnCancelListener { onPlayButtonClick() }
 
         }
         setStyle(STYLE_NO_FRAME, android.R.style.Theme)
 
-        arguments!!.let {
-            gridSize = GridSize.valueOf(it.getString(GRID_SIZE, GridSize.NORMAL.name))
-            gameSpeed = GameSpeed.valueOf(it.getString(GAME_SPEED, GameSpeed.FAST.name))
-            soundOn = it.getBoolean(SOUND_ON)
-        }
+        val context = requireContext()
+        configurationHelper = ConfigurationHelper.getInstance(context)
+        musicPlayerHelper = MusicPlayerHelper.getInstance(context)
 
-        homeButton.setOnClickListener { view: View -> onHomeButtonClick(view) }
-        settingsButton.setOnClickListener { view: View -> onSettingsButtonClick(view) }
-        continueButton.setOnClickListener { view: View -> onPlayButtonClick(view) }
-        restartButton.setOnClickListener { view: View -> onRestartButtonClick(view) }
+
+        homeButton.setOnClickListener { onHomeButtonClick() }
+        settingsButton.setOnClickListener { onSettingsButtonClick() }
+        continueButton.setOnClickListener { onPlayButtonClick() }
+        restartButton.setOnClickListener { onRestartButtonClick() }
 
     }
 
-    private fun onHomeButtonClick(view: View) {
-        makeButtonSound()
+    private fun onHomeButtonClick() {
+        musicPlayerHelper.buttonSoundAsync()
         listener.onPauseDialogListenerReturnHomeClick()
     }
 
-    private fun onSettingsButtonClick(view: View) {
-        makeButtonSound()
+    private fun onSettingsButtonClick() {
+        musicPlayerHelper.buttonSoundAsync()
         val fm = requireFragmentManager()
-        SettingsDialog.newInstance(fm, gridSize, gameSpeed, soundOn)
+        SettingsDialog.newInstance(fm)
     }
 
-    private fun onPlayButtonClick(view: View) {
-        makeButtonSound()
+    private fun onPlayButtonClick() {
+        musicPlayerHelper.buttonSoundAsync()
         listener.onPauseDialogListenerResumeButtonClick()
         this.dismiss()
     }
 
-    private fun onRestartButtonClick(view: View) {
-        makeButtonSound()
+    private fun onRestartButtonClick() {
+        musicPlayerHelper.buttonSoundAsync()
         listener.onPauseDialogListenerRestartButtonClick()
         this.dismiss()
-    }
-
-    private fun makeButtonSound() = runBlocking(Dispatchers.Default) {
-        GlobalScope.async {
-            MusicPlayerService.playButtonSound(requireContext())
-        }
     }
 
     override fun onAttach(context: Context) {
@@ -100,18 +84,6 @@ class PauseDialog : DialogFragment() {
         }
     }
 
-    /**
-     * In case the settings value change (Parent activity listener) we update the pause dialog values
-     * for the next time we call settigs dialog
-     * @param gridSize Is the size of the grid
-     * @param gameSpeed Specifies the speed of simon
-     * @param soundOn Specifies whether or not the game will play fx sounds
-     */
-    fun updateValues(gridSize: GridSize, gameSpeed: GameSpeed, soundOn: Boolean) {
-        this.soundOn = soundOn
-        this.gridSize = gridSize
-        this.gameSpeed = gameSpeed
-    }
 
     interface PauseDialogListener : SettingsDialog.SettingsDialogListener {
         fun onPauseDialogListenerResumeButtonClick()
@@ -121,14 +93,9 @@ class PauseDialog : DialogFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(gridSize: GridSize, gameSpeed: GameSpeed, soundOn: Boolean): PauseDialog {
-            val pauseDialog = PauseDialog().apply {
-                arguments = Bundle().apply {
-                    putString(GRID_SIZE, gridSize.name)
-                    putString(GAME_SPEED, gameSpeed.name)
-                    putBoolean(SOUND_ON, soundOn)
-                }
-            }
+        fun newInstance(fragmentManager: FragmentManager): PauseDialog {
+            val pauseDialog = PauseDialog()
+            pauseDialog.show(fragmentManager, TAG)
             return pauseDialog
         }
     }

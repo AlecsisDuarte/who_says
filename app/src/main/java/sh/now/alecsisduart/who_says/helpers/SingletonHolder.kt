@@ -1,4 +1,4 @@
-package sh.now.alecsisduarte.who_says.helpers
+package sh.now.alecsisduart.who_says.helpers
 
 /**
  * Encapsulation and initialization of a singleton with arguments using as
