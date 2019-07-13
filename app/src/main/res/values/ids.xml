@@ -1,2 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<!--
+Google Play game services IDs.
+Save this file as res/values/games-ids.xml in your project.
+-->
+<resources>
+    <!-- app_id -->
+    <string name="app_id" translatable="false">169953103607</string>
+    <!-- package_name -->
+    <string name="package_name" translatable="false">sh.now.alecsisduart.who_says</string>
+    <!-- achievement Learning the basics -->
+    <string name="achievement_learning_the_basics" translatable="false">CgkI9536j_kEEAIQAg</string>
+    <!-- achievement You got it -->
+    <string name="achievement_you_got_it" translatable="false">CgkI9536j_kEEAIQAw</string>
+    <!-- achievement You got good at it -->
+    <string name="achievement_you_got_good_at_it" translatable="false">CgkI9536j_kEEAIQBA</string>
+    <!-- achievement Amazing -->
+    <string name="achievement_amazing" translatable="false">CgkI9536j_kEEAIQBQ</string>
+    <!-- achievement Bored -->
+    <string name="achievement_bored" translatable="false">CgkI9536j_kEEAIQBw</string>
+    <!-- achievement Really Really Bored -->
+    <string name="achievement_really_really_bored" translatable="false">CgkI9536j_kEEAIQBg</string>
+    <!-- leaderboard Normal Board High Scores -->
+    <string name="leaderboard_normal_board_high_scores" translatable="false">CgkI9536j_kEEAIQAQ</string>
+    <!-- leaderboard Big Board High Scores -->
+    <string name="leaderboard_big_board_high_scores" translatable="false">CgkI9536j_kEEAIQCA</string>
+</resources>

@@ -2,6 +2,9 @@
 <resources>
 
     <!--Game Activity-->
-    <integer name="game_activity_board_transition_duration">450</integer>
+    <integer name="game_activity_board_transition_duration">@android:integer/config_mediumAnimTime</integer>
+    <integer name="game_activity_turn_transition_duration">@android:integer/config_shortAnimTime</integer>
+    <integer name="game_activity_score_transition_duration">@android:integer/config_shortAnimTime</integer>
+
 
 </resources>

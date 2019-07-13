@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     <string name="app_name">Who Says?</string>
     <string name="simon">Simon</string>
     <string name="continue_button">Continue</string>
@@ -7,18 +7,22 @@
     <string name="accept">Acept</string>
     <string name="cancel">Cancel</string>
     <string name="turn">Turn</string>
+    <string name="ok">Ok</string>
     <string name="no_scoreboard">No scoreboard implementation yet</string>
+    <string name="ready">Ready</string>
+    <string name="set">Set</string>
+    <string name="go">Go</string>
 
     <string name="you_want_to_replay">Retry?</string>
     <string name="you_want_to_replay_description">You lost, do you want to play again?</string>
 
     <string name="goind_home">Home</string>
-    <string name="going_home_description">Do you want to return? You will loose your current score</string>
+    <string name="going_home_description">Do you want to return? You will lose your current score</string>
 
 
     <!--Settings-->
     <string name="settings_title">Settings</string>
-    <string name="settings_content_game_size">Game Size</string>
+    <string name="settings_content_game_size">Grid Size</string>
     <string name="settings_content_sound_fx">Sounds</string>
     <string name="settings_content_sound_fx_description">Enables or disables the sound effects</string>
 
@@ -49,5 +53,14 @@
     <string name="simon_purple_button_description">Purple button</string>
     <string name="simon_gray_button_description">Gray button</string>
     <string name="your_turn">Yours</string>
+
+    <!--Exceptions-->
+    <string name="status_exception_error">%1$s (status %2$d). %3$s.</string>
+    <string name="events_exception">There was an issue communicating with the events</string>
+    <string name="achievements_exception">There was an issue communicating with the achievements</string>
+    <string name="leaderboards_exception">There was an issue communicating with the score boards</string>
+    <string name="players_exception">There was an issue communicating with players provider</string>
+    <string name="signin_other_error">There was an issue with sign in. Please try again later.</string>
+
 
 </resources>

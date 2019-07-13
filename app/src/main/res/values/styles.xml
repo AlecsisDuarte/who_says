@@ -25,6 +25,7 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
+
     <style name="TextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="fontFamily">@font/space_mono</item>
         <item name="android:textSize">@dimen/content_text_size</item>
@@ -35,9 +36,13 @@
         <item name="android:textSize">@dimen/content_text_size</item>
     </style>
 
-    <style name="OutlineButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+    <style name="Button" parent="Widget.MaterialComponents.Button">
         <item name="fontFamily">@font/space_mono</item>
-        <item name="android:textSize">@dimen/content_text_size</item>
+        <item name="iconSize">@dimen/button_icon_size</item>
+        <item name="iconPadding">@dimen/button_icon_padding</item>
+        <item name="android:textSize">@dimen/button_text_size</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <style name="Divider">
@@ -51,6 +56,7 @@
         <item name="android:background">@drawable/card_button_background</item>
         <item name="android:layout_width">@dimen/card_button_width</item>
         <item name="android:layout_height">@dimen/card_button_height</item>
+        <item name="android:layout_margin">@dimen/card_button_margin</item>
     </style>
 
     <style name="SimonButton" parent="Widget.AppCompat.ImageButton">
