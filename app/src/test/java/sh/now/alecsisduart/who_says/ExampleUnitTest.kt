@@ -1,4 +1,4 @@
-package sh.now.alecsisduarte.who_says
+package sh.now.alecsisduart.who_says
 
 import org.junit.Test
 

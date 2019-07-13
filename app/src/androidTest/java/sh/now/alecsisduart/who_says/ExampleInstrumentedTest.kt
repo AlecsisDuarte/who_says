@@ -1,4 +1,4 @@
-package sh.now.alecsisduarte.who_says
+package sh.now.alecsisduart.who_says
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("sh.now.alecsisduarte.who_says", appContext.packageName)
+        assertEquals("sh.now.alecsisduart.who_says", appContext.packageName)
     }
 }

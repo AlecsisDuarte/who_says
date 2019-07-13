@@ -40,4 +40,14 @@
     <string name="you_want_to_replay">¿Volver a intentar?</string>
     <string name="you_want_to_replay_description">Perdiste, ¿Deseas volver a jugar?</string>
     <string name="your_turn">Tuyo</string>
+    <string name="status_exception_error">%1$s (estatus %2$d). %3$s.</string>
+    <string name="achievements_exception">Hubo un error al comunicarse con los logros</string>
+    <string name="events_exception">Hubo un error al comunicarse con los eventos</string>
+    <string name="players_exception">Hubo un error al comunicarse con los jugadores</string>
+    <string name="ok">Ok</string>
+    <string name="leaderboards_exception">Hubo un error al comunicarse con las puntuaciones</string>
+    <string name="go">Fuera</string>
+    <string name="ready">En sus marcas</string>
+    <string name="set">Listos</string>
+    <string name="signin_other_error">Hubo un error al iniciar sesión. Intentelo mas tarde</string>
 </resources>
