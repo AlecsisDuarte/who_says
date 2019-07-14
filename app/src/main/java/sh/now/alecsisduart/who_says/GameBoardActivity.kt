@@ -16,6 +16,7 @@ import kotlinx.coroutines.*
 import sh.now.alecsisduart.who_says.bots.SimonBot
 import sh.now.alecsisduart.who_says.dialogs.ConfirmDialog
 import sh.now.alecsisduart.who_says.dialogs.PauseDialog
+import sh.now.alecsisduart.who_says.enums.GameSpeed
 
 import sh.now.alecsisduart.who_says.enums.GridSize
 import sh.now.alecsisduart.who_says.helpers.ConfigurationHelper
@@ -24,7 +25,7 @@ import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
 import sh.now.alecsisduart.who_says.models.AccomplishmentsModel
 import sh.now.alecsisduart.who_says.services.MusicPlayerService
 
-private const val MAX_SPEED = 10f
+private const val MAX_SPEED = 12f
 
 private const val TAG = "GameBoardActivity"
 
@@ -216,9 +217,7 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
                 if (curButtonToPress == buttonsToPress.size) {
                     isSimonTurn = true
                     curButtonToPress = 0
-                    mConfigurationHelper.let {
-                        curScore += (it.gameSpeed.score * it.gridSize.multiplier).toInt()
-                    }
+                    curScore += calculateScore()
                     scoreSwitcher.setText(curScore.toString())
                     turnSwitcher.setText(getText(R.string.simon))
                     initializeSimon(this)
@@ -236,7 +235,9 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
                         .setTitle(getText(R.string.you_want_to_replay))
                         .setMessage(getString(R.string.you_want_to_replay_description))
                         .setConfirmButton(R.string.accept, View.OnClickListener { restartGame() })
-                        .setCancelButton(R.string.cancel, View.OnClickListener { exitGame() })
+                        .setCancelButton(R.string.cancel, View.OnClickListener {
+                            exitGame()
+                        })
                         .show()
 
                 }
@@ -268,10 +269,11 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     }
 
     private fun simonButtonSound(imageButton: ImageButton) {
-        buttonsIds[imageButton]?.let {
-            mMusicPlayerHelper.simonSoundAsync(it)
+        if (mConfigurationHelper.soundOn) {
+            buttonsIds[imageButton]?.let {
+                mMusicPlayerHelper.simonSoundAsync(it)
+            }
         }
-
     }
 
     private fun initializeSimon(context: Context) {
@@ -314,7 +316,7 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
 
     private fun checkForAccomplishments() {
         accomplishments.apply {
-            if (bigScore >= 5 || normalScore >= 5 ) {
+            if (bigScore >= 5 || normalScore >= 5) {
                 learningTheBasicsAchievement = true
             }
             if (bigScore >= 10 || normalScore >= 10) {
@@ -330,6 +332,15 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         mGooglePlayerHelper.pushAccomplishments(accomplishments, gameBoardContainer)
     }
 
+    private fun calculateScore(): Int = (
+            when {
+                speed < GameSpeed.FAST.speed -> GameSpeed.NORMAL.score
+                speed < GameSpeed.INSANE.speed -> GameSpeed.FAST.score
+                else -> GameSpeed.INSANE.score
+            } * mConfigurationHelper.gridSize.multiplier
+            ).toInt()
+
+
     //Listeners
     override fun onSimonBotFinished(buttonsPressed: Array<Int>) {
         buttonsToPress = buttonsPressed
@@ -338,7 +349,7 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         //We speed up and increase the amount of buttons to press
         ++steps
         if (speed < MAX_SPEED) {
-            speed += 0.1f
+            speed += 0.5f
         }
         while (simonBot?.state() != SimonBot.JobState.FINISHED);
         isSimonTurn = false
