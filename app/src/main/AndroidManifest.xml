@@ -3,7 +3,8 @@
     package="sh.now.alecsisduart.who_says">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
     <application
         android:allowBackup="true"
@@ -25,7 +26,7 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity" android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -33,7 +34,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".GameBoardActivity" />
+        <activity android:name=".GameBoardActivity" android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

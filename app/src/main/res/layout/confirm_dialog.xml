@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         style="@style/TitleText" />
 
-    <View style="@style/Divider" />
+    <View android:id="@+id/divider" style="@style/Divider" />
 
     <TextView
         android:id="@+id/confirmContent"
@@ -23,6 +23,7 @@
         android:layout_height="8dp" />
 
     <LinearLayout
+        android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
@@ -33,11 +34,10 @@
             style="@style/TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
             android:text="@string/cancel" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/okButton"
+            android:id="@+id/confirmButton"
             style="@style/TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

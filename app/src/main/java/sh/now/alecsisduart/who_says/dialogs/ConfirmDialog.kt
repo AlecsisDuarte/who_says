@@ -1,39 +1,51 @@
 package sh.now.alecsisduart.who_says.dialogs
 
+import android.app.Activity
+import android.app.Application
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.opengl.Visibility
+import android.os.Build
 import android.os.Bundle
+import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.view.children
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.resources.MaterialAttributes
 import kotlinx.android.synthetic.main.confirm_dialog.*
 import sh.now.alecsisduart.who_says.R
 
-private const val ID = "confirmdialog.param.id"
-private const val TITLE = "confirmdialog.param.title"
-private const val MESSAGE = "confirmdialog.param.message"
+//
+//private const val ID = "confirmdialog.param.id"
+//private const val TITLE = "confirmdialog.param.title"
+//private const val MESSAGE = "confirmdialog.param.message"
+//private const val CONFIRM_BUTTON = "confirmdialog.param.confirm_button"
+//private const val CANCEL_BUTTON_TEXT = "confirmdialog.param.cancel_button"
 
-class ConfirmDialog : DialogFragment() {
+private const val TAG = "confirmDialog"
 
-    private var dialogId: Int = 0
-    private lateinit var title: String
-    private lateinit var message: String
+class ConfirmDialog private constructor() : DialogFragment() {
+
+    internal var dialogId: Int = 0
+    internal var title: CharSequence? = null
+    internal var message: CharSequence? = null
+
+    internal var confirmButtonOnClickListener: View.OnClickListener? = null
+    internal var cancelButtonOnClickListener: View.OnClickListener? = null
+
+    internal var confirmButtonText: CharSequence? = null
+    internal var cancelButtonText: CharSequence? = null
+
     private var isActive = true
-
-    private lateinit var listener: ConfirmDialogListener
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is ConfirmDialogListener) {
-            listener = context
-        } else {
-            throw  Error("${context::class.java.simpleName} must implement ConfirmDialogListener")
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.confirm_dialog, container)
@@ -41,12 +53,6 @@ class ConfirmDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        arguments!!.let {
-            title = it.getString(TITLE, "NOT SPECIFIED")
-            message = it.getString(MESSAGE, "")
-            dialogId = it.getInt(ID)
-        }
 
         dialog?.let { d: Dialog ->
             d.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -56,20 +62,53 @@ class ConfirmDialog : DialogFragment() {
         }
 
 
-        confirmTitle.text = title
-        confirmContent.text = message
+        if (title.isNullOrEmpty()) {
+            confirmTitle.visibility = View.GONE
+            divider.visibility = View.GONE
+        } else {
+            confirmTitle.text = title
+        }
 
-        okButton.setOnClickListener { onConfirm() }
-        cancelButton.setOnClickListener { onCancel() }
+        if (message.isNullOrEmpty()) {
+            confirmContent.visibility = View.GONE
+            divider.visibility = View.GONE
+        } else {
+            confirmContent.text = message
+        }
+
+        if (cancelButtonText.isNullOrEmpty()) {
+            cancelButton.visibility = View.GONE
+        } else {
+            cancelButton.let { mb ->
+                mb.text = cancelButtonText
+                mb.setOnClickListener {
+                    this.dismiss()
+                    cancelButtonOnClickListener?.onClick(it)
+                }
+            }
+        }
+        confirmButton.setButtonTextAndListener(confirmButtonText, confirmButtonOnClickListener)
+        cancelButton.setButtonTextAndListener(cancelButtonText, cancelButtonOnClickListener)
+    }
+
+    private inline fun MaterialButton.setButtonTextAndListener(text: CharSequence?, listener: View.OnClickListener?) {
+        if (text.isNullOrEmpty()) {
+            visibility = View.GONE
+        } else {
+            setText(text)
+            setOnClickListener {
+                close()
+                listener?.onClick(it)
+            }
+        }
+    }
+
+    private fun close() {
+        this.dismiss()
     }
 
     fun isActive(): Boolean {
         return isActive
-    }
-
-    private fun onConfirm() {
-        listener.onConfirmDialogConfirmClick(dialogId)
-        this.dismiss()
     }
 
     override fun onDismiss(dialog: DialogInterface) {
@@ -77,28 +116,70 @@ class ConfirmDialog : DialogFragment() {
         isActive = false
     }
 
-    private fun onCancel() {
-        listener.onConfirmDialogCancelClick(dialogId)
-        this.dismiss()
-    }
+    data class Builder(private var context: Context, private var fragmentManager: FragmentManager) {
+        private var dialog = ConfirmDialog()
+        private var dialogId: Int = 0
+        private var title: CharSequence? = null
+        private var message: CharSequence? = null
 
-    interface ConfirmDialogListener {
-        fun onConfirmDialogConfirmClick(id: Int)
-        fun onConfirmDialogCancelClick(id: Int)
-    }
+        private var confirmButtonOnClickListener: View.OnClickListener? = null
+        private var cancelButtonOnClickListener: View.OnClickListener? = null
 
-    companion object {
-        @JvmStatic
-        fun newInstance(fragmentManager: FragmentManager, title: String, message: String, id: Int): ConfirmDialog {
-            val confirmDialog = ConfirmDialog().apply {
-                arguments = Bundle().apply {
-                    putString(TITLE, title)
-                    putString(MESSAGE, message)
-                    putInt(ID, id)
-                }
+        private var confirmButtonText: CharSequence? = null
+        private var cancelButtonText: CharSequence? = null
+
+        private fun defaultMaterialButton(): MaterialButton {
+            val mb = MaterialButton(context, null, R.attr.borderlessButtonStyle)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                mb.setTextAppearance(R.style.ContentText)
+            } else {
+                mb.setTextAppearance(context, R.style.ContentText)
             }
-            confirmDialog.show(fragmentManager, title.trim())
-            return confirmDialog
+
+            return mb
+        }
+
+        fun setTitle(title: CharSequence) = apply { this.title = title }
+        fun setMessage(message: String) = apply { this.message = message }
+
+        fun setConfirmButton(resId: Int, listener: View.OnClickListener? = null) = apply {
+            val text = context.getText(resId)
+            this.setConfirmButton(text, listener)
+        }
+
+        fun setConfirmButton(text: CharSequence, listener: View.OnClickListener? = null) = apply {
+            confirmButtonText = text
+            confirmButtonOnClickListener = listener
+        }
+
+        fun setCancelButton(resId: Int, listener: View.OnClickListener? = null) = apply {
+            val text = context.getText(resId)
+            this.setCancelButton(text, listener)
+        }
+
+        fun setCancelButton(text: CharSequence, listener: View.OnClickListener? = null) = apply {
+            cancelButtonText = text
+            cancelButtonOnClickListener = listener
+        }
+
+        fun setDialogId(id: Int) = apply { this.dialogId = dialogId }
+
+        fun show(): ConfirmDialog {
+            dialog.let {
+                it.title = this.title
+                it.message = this.message
+                it.dialogId = this.dialogId
+
+                it.cancelButtonOnClickListener = this.cancelButtonOnClickListener
+                it.cancelButtonText = this.cancelButtonText
+
+                it.confirmButtonOnClickListener = this.confirmButtonOnClickListener
+                it.confirmButtonText = this.confirmButtonText
+            }
+
+            dialog.show(fragmentManager, TAG)
+            return dialog
+
         }
     }
 }

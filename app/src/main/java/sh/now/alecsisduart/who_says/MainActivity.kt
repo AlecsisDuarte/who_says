@@ -6,23 +6,19 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentManager
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.games.*
 import com.google.android.gms.games.event.EventBuffer
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.main_activity.sound_button
 import kotlinx.coroutines.*
+import sh.now.alecsisduart.who_says.dialogs.InformationDialog
 import sh.now.alecsisduart.who_says.dialogs.SettingsDialog
 import sh.now.alecsisduart.who_says.helpers.ConfigurationHelper
+import sh.now.alecsisduart.who_says.helpers.GooglePlayServicesHelper
 import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
-import sh.now.alecsisduart.who_says.models.AccomplishmentsModel
 import sh.now.alecsisduart.who_says.services.MusicPlayerService
 import sh.now.alecsisduart.who_says.utils.ExceptionUtils
 
@@ -34,25 +30,22 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
     private var mGoogleSignInClient: GoogleSignInClient? = null
 
     // Client variables
-    private var mAchievementsClient: AchievementsClient? = null
-    private var mLeaderboardsClient: LeaderboardsClient? = null
     private var mEventsClient: EventsClient? = null
-    private var mPlayersClient: PlayersClient? = null
 
     // request codes we use when invoking an external activity
     private val RC_UNUSED = 5001
     private val RC_SIGN_IN = 9001
 
-    // achievements and scores we're pending to push to the cloud
-    private val mAccomplishments = AccomplishmentsModel()
-
     //Game Data
     private lateinit var mConfigurationHelper: ConfigurationHelper
     private lateinit var mMusicPlayerHelper: MusicPlayerHelper
 
+    //GooglePlayServices
+    private lateinit var googlePlayServicesHelper: GooglePlayServicesHelper
 
     //Dialogs
     private var settingsDialog: SettingsDialog? = null
+    private var informationDialog: InformationDialog? = null
     private var goingToGame: Boolean = false
 
 
@@ -60,13 +53,7 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
-        mGoogleSignInClient =
-            GoogleSignIn.getClient(
-                this,
-                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                    .requestEmail()
-                    .build()
-            )
+        googlePlayServicesHelper = GooglePlayServicesHelper.getInstance(this)
 
         mConfigurationHelper = ConfigurationHelper.getInstance(this)
         mMusicPlayerHelper = MusicPlayerHelper.getInstance(this)
@@ -99,25 +86,6 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
 
     }
 
-    private fun isSignedIn() : Boolean = GoogleSignIn.getLastSignedInAccount(this) != null
-
-    private fun signInSilently() {
-        Log.d(TAG, "signInSilently")
-
-        mGoogleSignInClient?.silentSignIn()?.addOnCompleteListener(this) {
-            if (it.isSuccessful) {
-                Log.d(TAG, "signInSilently: success")
-                onConnected(it.result!!)
-            } else {
-                onDisconnected()
-            }
-        }
-    }
-
-    private fun startSignInIntent() = mGoogleSignInClient?.let {
-        startActivityForResult(it.signInIntent, RC_SIGN_IN)
-    }
-
     private fun setBackgroundAnimation() {
         val animBackground = backgroundLayout.background!! as AnimationDrawable
         animBackground.setEnterFadeDuration(10)
@@ -143,29 +111,6 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
         }
     }
 
-    private fun signOut() {
-        Log.d(TAG, "signOut()")
-        if (!isSignedIn()) {
-            Log.w(TAG, "signOut() callet, but was not signed in!")
-            return
-        }
-        mGoogleSignInClient?.signOut()?.addOnCompleteListener {
-            val successful = it.isSuccessful
-            Log.d(TAG, "signOut(): ${if (successful) "success" else "failed"}")
-            onDisconnected()
-        }
-    }
-
-    private fun showScoreBoards() {
-        mLeaderboardsClient?.allLeaderboardsIntent
-            ?.addOnSuccessListener {
-                startActivityForResult(intent, RC_UNUSED)
-            }
-            ?.addOnFailureListener {
-                ExceptionUtils.handle(this, it, getString(R.string.leaderboards_exception))
-            }
-    }
-
 
     //Events
     fun onMusicButtonClick(view: View) {
@@ -177,7 +122,7 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
 
     fun onScoreBoardClick(view: View) {
         mMusicPlayerHelper.buttonSoundAsync()
-        showScoreBoards()
+        googlePlayServicesHelper.showScoreBoards()
     }
 
     fun onConfigurationClick(view: View) {
@@ -191,7 +136,8 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
     }
 
     fun onGooglePlayButtonClick(view: View) {
-        startSignInIntent()
+        mMusicPlayerHelper.buttonSoundAsync()
+        googlePlayServicesHelper.startSignInIntent()
     }
 
     fun onSimonButtonClick(view: View) {
@@ -203,50 +149,38 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
         }
     }
 
-    private fun onConnected(googleSignInAccount: GoogleSignInAccount) {
-        Log.d(TAG, "onConnected(): connected to Google API's")
+    fun onAchievementsClick(view: View) {
+        mMusicPlayerHelper.buttonSoundAsync()
+        googlePlayServicesHelper.showAchievements()
+    }
 
-        mAchievementsClient = Games.getAchievementsClient(this, googleSignInAccount)
-        mLeaderboardsClient = Games.getLeaderboardsClient(this, googleSignInAccount)
-        mEventsClient = Games.getEventsClient(this, googleSignInAccount)
-        mPlayersClient = Games.getPlayersClient(this, googleSignInAccount)
-
-        hideGooglePlayButton()
-
-        mPlayersClient?.currentPlayer?.addOnCompleteListener {
-            if (it.isSuccessful) {
-                mConfigurationHelper.displayName = it.result!!.displayName
-            } else {
-                val exception = it.exception!!
-                ExceptionUtils.handle(this, exception, getString(R.string.players_exception))
-            }
-            //TODO: REMOVE THIS
-            Toast.makeText(this, mConfigurationHelper.displayName, Toast.LENGTH_SHORT).show()
+    fun onInformationClick(view: View) {
+        mMusicPlayerHelper.highSoundAsync()
+        if (informationDialog == null || !informationDialog!!.isActive) {
+            informationDialog = InformationDialog.newInstance(supportFragmentManager)
         }
-
-        loadAndPrintEvents()
 
     }
 
 
-    private fun onDisconnected() {
-        Log.d(TAG, "onDisconnected()")
+    private fun onGoogleGamesConnected(googleSignInAccount: GoogleSignInAccount) {
+        hideGooglePlayButton()
+    }
 
-        mLeaderboardsClient = null
-        mAchievementsClient = null
-        mPlayersClient = null
 
+    private fun onGoogleGamesDisconnected() {
         hideGooglePlayButton(false)
-
     }
 
     private fun hideGooglePlayButton(hide: Boolean = true) {
         if (hide) {
             googlePlayButton.visibility = View.GONE
             scoreBoardButton.visibility = View.VISIBLE
+            achievementsButton.visibility = View.VISIBLE
         } else {
             googlePlayButton.visibility = View.VISIBLE
             scoreBoardButton.visibility = View.GONE
+            achievementsButton.visibility = View.GONE
         }
     }
 
@@ -257,30 +191,19 @@ class MainActivity : AppCompatActivity(), SettingsDialog.SettingsDialogListener 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            RC_SIGN_IN -> {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(intent)
-                try {
-                    val account = task.getResult(ApiException::class.java)
-                    onConnected(account!!)
-                } catch (apiException: ApiException) {
-                    var message = apiException.message
-                    if (message.isNullOrEmpty()) {
-                        message = getString(R.string.signin_other_error)
-                    }
-                    Log.e(TAG, message, apiException)
-                    onDisconnected()
-                    AlertDialog.Builder(this)
-                        .setMessage(message)
-                        .setNeutralButton(R.string.ok, null)
-                        .show()
-                }
+            GooglePlayServicesHelper.RC_SIGN_IN -> {
+                googlePlayServicesHelper.signInIntentResult(data, supportFragmentManager)
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        signInSilently()
+        googlePlayServicesHelper
+            .attachOnConnectedListener(::onGoogleGamesConnected)
+            .attachOnDisconnectedListener(::onGoogleGamesDisconnected)
+            .signInSilently(this)
+
         goingToGame = false
         MusicPlayerService.startMusic(this, mConfigurationHelper.musicOn)
     }

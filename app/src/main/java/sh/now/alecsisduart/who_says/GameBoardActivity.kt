@@ -19,17 +19,16 @@ import sh.now.alecsisduart.who_says.dialogs.PauseDialog
 
 import sh.now.alecsisduart.who_says.enums.GridSize
 import sh.now.alecsisduart.who_says.helpers.ConfigurationHelper
+import sh.now.alecsisduart.who_says.helpers.GooglePlayServicesHelper
 import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
+import sh.now.alecsisduart.who_says.models.AccomplishmentsModel
 import sh.now.alecsisduart.who_says.services.MusicPlayerService
 
-const val RETURN_HOME_DIALOG_ID = 1
-private const val RETRY_GAME_DIALOG_ID = 2
 private const val MAX_SPEED = 10f
 
 private const val TAG = "GameBoardActivity"
 
-class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, SimonBot.SimonBotListener,
-    ConfirmDialog.ConfirmDialogListener {
+class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, SimonBot.SimonBotListener {
 
     private lateinit var mMusicPlayerHelper: MusicPlayerHelper
     private lateinit var mConfigurationHelper: ConfigurationHelper
@@ -41,7 +40,6 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     private var isSimonTurn: Boolean = true
     private var steps: Int = 1
     private var speed: Float = 1f
-
 
     //Animations Durations
     private var shortAnimationDuration: Int = 0
@@ -63,6 +61,10 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     private lateinit var buttonsToPress: Array<Int>
     private var curButtonToPress: Int = 0
     private var curScore = 0
+    private var accomplishments = AccomplishmentsModel()
+
+    //Google Play Services
+    private lateinit var mGooglePlayerHelper: GooglePlayServicesHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +72,7 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
 
         mConfigurationHelper = ConfigurationHelper.getInstance(this)
         mMusicPlayerHelper = MusicPlayerHelper.getInstance(this)
+        mGooglePlayerHelper = GooglePlayServicesHelper.getInstance(this)
 
         MusicPlayerService.startMusic(this, false)
 
@@ -119,14 +122,14 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     }
 
 
+    //Animations
     private fun initializeAnimationsDurations() {
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
         mediumAnimationDuration = resources.getInteger(android.R.integer.config_mediumAnimTime)
         longAnimationDuration = resources.getInteger(android.R.integer.config_longAnimTime)
     }
 
-    //Loaders
-    fun turnViewFadeOut() {
+    private fun turnViewFadeOut() {
         turnLabelId.apply {
             alpha = 1f
             visibility = View.VISIBLE
@@ -138,7 +141,7 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
 
     }
 
-    fun turnViewFadeIn() {
+    private fun turnViewFadeIn() {
         turnLabelId.apply {
             alpha = 0f
             visibility = View.VISIBLE
@@ -150,6 +153,7 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         }
     }
 
+    //Loaders
     fun changeTextViewColor(textView: TextView, colorId: Int) {
         textView.setTextColor(ContextCompat.getColor(this, colorId))
     }
@@ -187,6 +191,10 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
 
     }
 
+    fun exitGame() {
+        this.finish()
+    }
+
     //Events
     fun onPauseButtonClick(view: View) {
         mMusicPlayerHelper.buttonSoundAsync()
@@ -218,12 +226,19 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
             } else {
                 if (confirmDialog == null || !confirmDialog!!.isActive()) {
                     mMusicPlayerHelper.looserSoundAsync()
-                    confirmDialog = ConfirmDialog.newInstance(
-                        supportFragmentManager,
-                        getString(R.string.you_want_to_replay),
-                        getString(R.string.you_want_to_replay_description),
-                        RETRY_GAME_DIALOG_ID
-                    )
+                    if (mConfigurationHelper.gridSize == GridSize.NORMAL) {
+                        accomplishments.normalScore = curScore
+                    } else {
+                        accomplishments.bigScore = curScore
+                    }
+                    checkForAccomplishments()
+                    confirmDialog = ConfirmDialog.Builder(applicationContext, supportFragmentManager)
+                        .setTitle(getText(R.string.you_want_to_replay))
+                        .setMessage(getString(R.string.you_want_to_replay_description))
+                        .setConfirmButton(R.string.accept, View.OnClickListener { restartGame() })
+                        .setCancelButton(R.string.cancel, View.OnClickListener { exitGame() })
+                        .show()
+
                 }
             }
 
@@ -240,6 +255,11 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         steps = 1
         speed = mConfigurationHelper.gameSpeed.speed
         buttonsToPress = emptyArray()
+
+        //Acomplishments
+        ++accomplishments.plays
+        checkForAccomplishments()
+
 
         readySetGoTextAnimation {
             initializeSimon(this)
@@ -292,6 +312,24 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         }
     }
 
+    private fun checkForAccomplishments() {
+        accomplishments.apply {
+            if (bigScore >= 5 || normalScore >= 5 ) {
+                learningTheBasicsAchievement = true
+            }
+            if (bigScore >= 10 || normalScore >= 10) {
+                youGotItAchievement = true
+            }
+            if (bigScore >= 200 || normalScore >= 200) {
+                youGotGoodAtItAchievement = true
+            }
+            if (normalScore >= 5000 || bigScore >= 500) {
+                amazingAchievement = true
+            }
+        }
+        mGooglePlayerHelper.pushAccomplishments(accomplishments, gameBoardContainer)
+    }
+
     //Listeners
     override fun onSimonBotFinished(buttonsPressed: Array<Int>) {
         buttonsToPress = buttonsPressed
@@ -304,7 +342,7 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         }
         while (simonBot?.state() != SimonBot.JobState.FINISHED);
         isSimonTurn = false
-        turnSwitcher.setText(getText(R.string.your_turn))
+        turnSwitcher.setText(mConfigurationHelper.displayName)
     }
 
     override fun onSavedSettingsDialog(gridSizeChanged: Boolean, gameSpeedChanged: Boolean, soundOnChanged: Boolean) {
@@ -316,25 +354,9 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         }
     }
 
-    override fun onConfirmDialogCancelClick(id: Int) {
-        when (id) {
-            RETRY_GAME_DIALOG_ID -> {
-                this.finish()
-
-            }
-        }
-    }
-
-    override fun onConfirmDialogConfirmClick(id: Int) {
-        when (id) {
-            RETRY_GAME_DIALOG_ID -> {
-                restartGame()
-            }
-            RETURN_HOME_DIALOG_ID -> {
-                pauseDialog.dismiss()
-                this.finish()
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+        mGooglePlayerHelper.signInSilently(this)
     }
 
     override fun onPause() {
@@ -347,12 +369,12 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
 
     override fun onPauseDialogListenerReturnHomeClick() {
         if (confirmDialog == null || !confirmDialog!!.isActive()) {
-            confirmDialog = ConfirmDialog.newInstance(
-                supportFragmentManager,
-                getString(R.string.goind_home),
-                getString(R.string.going_home_description),
-                RETURN_HOME_DIALOG_ID
-            )
+            confirmDialog = ConfirmDialog.Builder(applicationContext, supportFragmentManager)
+                .setTitle(getString(R.string.goind_home))
+                .setMessage(getString(R.string.going_home_description))
+                .setConfirmButton(R.string.accept, View.OnClickListener { exitGame() })
+                .setCancelButton(R.string.cancel)
+                .show()
         }
     }
 

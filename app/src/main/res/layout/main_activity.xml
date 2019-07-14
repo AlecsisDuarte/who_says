@@ -11,7 +11,6 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="@dimen/card_container_width"
         android:layout_gravity="center"
         android:orientation="vertical">
 
@@ -63,10 +62,16 @@
 
             <ImageButton
                 style="@style/CardButton"
-
                 android:onClick="onScoreBoardClick"
                 android:id="@+id/scoreBoardButton"
                 android:src="@mipmap/scoreboard_icon"
+                android:visibility="gone" />
+
+            <ImageButton
+                style="@style/CardButton"
+                android:onClick="onAchievementsClick"
+                android:id="@+id/achievementsButton"
+                android:src="@mipmap/achievements_icon"
                 android:visibility="gone" />
 
             <ImageButton
@@ -79,4 +84,14 @@
         </LinearLayout>
     </LinearLayout>
 
+    <ImageButton
+        android:layout_marginBottom="@dimen/information_button_bottom_margin"
+        android:layout_marginRight="@dimen/information_button_right_margin"
+        android:layout_marginEnd="@dimen/information_button_right_margin"
+        android:layout_gravity="bottom|end"
+        android:layout_width="@dimen/information_button_width"
+        android:layout_height="@dimen/information_button_height"
+        android:background="@color/colorTransparent"
+        android:onClick="onInformationClick"
+        android:src="@mipmap/information_icon"/>
 </FrameLayout>
