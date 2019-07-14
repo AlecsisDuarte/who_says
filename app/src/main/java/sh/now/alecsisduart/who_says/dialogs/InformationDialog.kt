@@ -12,11 +12,14 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import kotlinx.android.synthetic.main.information_dialog.*
 import sh.now.alecsisduart.who_says.R
+import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
 
 private const val TAG = "InformationDialog"
 
 class InformationDialog : DialogFragment() {
     private var active = true
+    private lateinit var mMusicPlayerHelper: MusicPlayerHelper
+
     val isActive get() = active
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -33,16 +36,23 @@ class InformationDialog : DialogFragment() {
             }
 
         }
+
+        mMusicPlayerHelper = MusicPlayerHelper.getInstance(requireContext())
+
         setStyle(STYLE_NO_FRAME, android.R.style.Theme)
 
         privacyPolicyButton.setOnClickListener { openUri(R.string.uri_privacy_policy) }
         aboutMeButton.setOnClickListener { openUri(R.string.uri_about_me) }
         musicCreationButton.setOnClickListener { openUri(R.string.uri_music_creator) }
 
-        closeButton.setOnClickListener { this.dismiss() }
+        closeButton.setOnClickListener {
+            mMusicPlayerHelper.buttonSoundAsync()
+            this.dismiss()
+        }
     }
 
     private fun openUri(resId: Int) {
+        mMusicPlayerHelper.lowSoundAsync()
         startActivity(Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse(getString(resId))
         })

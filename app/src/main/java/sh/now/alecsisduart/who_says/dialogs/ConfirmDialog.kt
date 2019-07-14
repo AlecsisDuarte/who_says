@@ -54,9 +54,9 @@ class ConfirmDialog private constructor() : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        dialog?.let { d: Dialog ->
-            d.requestWindowFeature(Window.FEATURE_NO_TITLE)
-            d.window?.let { w: Window ->
+        dialog?.apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            window?.let { w: Window ->
                 w.setBackgroundDrawableResource(R.color.colorTransparent)
             }
         }
@@ -109,6 +109,11 @@ class ConfirmDialog private constructor() : DialogFragment() {
 
     fun isActive(): Boolean {
         return isActive
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        cancelButtonOnClickListener?.onClick(view)
     }
 
     override fun onDismiss(dialog: DialogInterface) {

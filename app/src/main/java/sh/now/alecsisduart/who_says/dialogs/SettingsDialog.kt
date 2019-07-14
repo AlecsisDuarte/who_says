@@ -23,6 +23,7 @@ import java.lang.ClassCastException
 
 
 private const val TAG = "SettingsDialog"
+private const val GAME_RUNNING_PARAM = "GAME_RUNNING_PARAM"
 
 class SettingsDialog : DialogFragment() {
 
@@ -30,6 +31,7 @@ class SettingsDialog : DialogFragment() {
     private lateinit var musicPlayerHelper: MusicPlayerHelper
 
     private var isActive: Boolean = true
+    private var gameRunning: Boolean = false
 
     private var originalSoundOn = true
     private lateinit var originalGameSpeed: GameSpeed
@@ -53,12 +55,15 @@ class SettingsDialog : DialogFragment() {
             originalSoundOn = it.soundOn
         }
 
-        dialog?.let { d: Dialog ->
-            d.requestWindowFeature(Window.FEATURE_NO_TITLE)
-            d.window?.let { w: Window ->
+        arguments?.let { bundle ->
+            gameRunning = bundle.getBoolean(GAME_RUNNING_PARAM, gameRunning)
+        }
+
+        dialog?.apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            window?.let { w: Window ->
                 w.setBackgroundDrawableResource(R.color.colorTransparent)
             }
-
         }
 
         loadGameSpeed()
@@ -66,9 +71,7 @@ class SettingsDialog : DialogFragment() {
         loadSoundOnSwitch()
 
         saveButton.setOnClickListener { onSaveButtonClick() }
-        soundSwitchText.setOnClickListener {
-            soundSwitch.performClick()
-        }
+        soundSwitchText.setOnClickListener { soundSwitch.performClick() }
     }
 
     override fun onAttach(context: Context) {
@@ -153,6 +156,16 @@ class SettingsDialog : DialogFragment() {
 
     private fun onSaveButtonClick() {
         musicPlayerHelper.buttonSoundAsync()
+        configurationHelper.apply {
+            if (gameRunning && (gridSize != originalGridSize || gameSpeed != originalGameSpeed)) {
+                confirmSave()
+            } else {
+                saveConfiguration()
+            }
+        }
+    }
+
+    private fun saveConfiguration() {
         configurationHelper.let {
             listener.onSavedSettingsDialog(
                 gridSizeChanged = it.gridSize != originalGridSize,
@@ -160,8 +173,16 @@ class SettingsDialog : DialogFragment() {
                 soundOnChanged = it.soundOn != originalSoundOn
             )
         }
-
         this.dismiss()
+    }
+
+    private fun confirmSave() {
+        ConfirmDialog.Builder(requireContext(), fragmentManager!!)
+            .setTitle(getText(R.string.save))
+            .setMessage(getString(R.string.settings_confirm_save_message))
+            .setConfirmButton(R.string.ok, View.OnClickListener { saveConfiguration() })
+            .setCancelButton(R.string.cancel, null)
+            .show()
     }
 
     fun isActive(): Boolean {
@@ -181,9 +202,14 @@ class SettingsDialog : DialogFragment() {
     companion object {
         @JvmStatic
         fun newInstance(
-            fragmentManager: FragmentManager
+            fragmentManager: FragmentManager,
+            gameRunning: Boolean = false
         ): SettingsDialog {
-            val sd = SettingsDialog()
+            val sd = SettingsDialog().apply {
+                arguments = Bundle().apply {
+                    putBoolean(GAME_RUNNING_PARAM, gameRunning)
+                }
+            }
             sd.showNow(fragmentManager, TAG)
             return sd
         }

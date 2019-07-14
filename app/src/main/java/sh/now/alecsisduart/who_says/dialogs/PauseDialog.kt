@@ -2,6 +2,7 @@ package sh.now.alecsisduart.who_says.dialogs
 
 import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -35,7 +36,6 @@ class PauseDialog : DialogFragment() {
             d.window?.let { w: Window ->
                 w.setBackgroundDrawableResource(R.color.colorTransparent)
             }
-            d.setOnCancelListener { onPlayButtonClick() }
 
         }
         setStyle(STYLE_NO_FRAME, android.R.style.Theme)
@@ -60,7 +60,7 @@ class PauseDialog : DialogFragment() {
     private fun onSettingsButtonClick() {
         musicPlayerHelper.buttonSoundAsync()
         val fm = requireFragmentManager()
-        SettingsDialog.newInstance(fm)
+        SettingsDialog.newInstance(fm, true)
     }
 
     private fun onPlayButtonClick() {
@@ -73,6 +73,11 @@ class PauseDialog : DialogFragment() {
         musicPlayerHelper.buttonSoundAsync()
         listener.onPauseDialogListenerRestartButtonClick()
         this.dismiss()
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        onPlayButtonClick()
     }
 
     override fun onAttach(context: Context) {
