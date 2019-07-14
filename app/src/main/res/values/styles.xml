@@ -11,6 +11,10 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppThemeWithSplash" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
     <style name="CodeText">
         <item name="fontFamily">@font/space_mono</item>
     </style>

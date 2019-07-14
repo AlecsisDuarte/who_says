@@ -39,6 +39,9 @@
     <string name="settings_content_game_speed_insane">Insane</string>
     <string name="settings_content_game_speed_insane_description">Insane paced game</string>
 
+    <!--Confirm Save-->
+    <string name="settings_confirm_save_message">Your score will be lost, do you want save anyway?</string>
+
     <string name="score_main_activity">Score</string>
     <string name="default_score_main_activity">0</string>
 

@@ -50,4 +50,10 @@
     <string name="ready">En sus marcas</string>
     <string name="set">Listos</string>
     <string name="signin_other_error">Hubo un error al iniciar sesión. Intentelo mas tarde</string>
+    <string name="about_developer">Desarrollador</string>
+    <string name="close">Cerrar</string>
+    <string name="information">Información</string>
+    <string name="music_creator">Creador de Musica</string>
+    <string name="privacy_policy">Politica de Privacidad</string>
+    <string name="settings_confirm_save_message">Tu puntuación se perdera. ¿desea guardar la configuración?</string>
 </resources>
