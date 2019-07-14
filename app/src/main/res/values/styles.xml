@@ -11,6 +11,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="CodeText">
+        <item name="fontFamily">@font/space_mono</item>
+    </style>
+    <style name="ProText">
+        <item name="fontFamily">@font/viga</item>
+    </style>
+
     <style name="TitleText" parent="TextAppearance.AppCompat.Title">
         <item name="fontFamily">@font/viga</item>
         <item name="android:textSize">@dimen/title_text_size</item>
@@ -29,6 +36,8 @@
     <style name="TextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="fontFamily">@font/space_mono</item>
         <item name="android:textSize">@dimen/content_text_size</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <style name="UncoloredTextButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
