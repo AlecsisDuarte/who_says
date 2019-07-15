@@ -36,7 +36,7 @@ git clone https://github.com/AlecsisDuarte/who_says
 - Here you can find the [Privacy Policy](https://android.alecsisduarte.now.sh/privacy_policy.html)
 
 ## Credits
--  All the music/sounds were created using [Chrome Experiments: Song Maker](https://musiclab.chromeexperiments.com/Song-Maker/)
+-  Music/sounds were created using [Chrome Experiments: Song Maker](https://musiclab.chromeexperiments.com/Song-Maker/)
 -  The fonts were downloaded from [Google Fonts](https://fonts.google.com)
     - Content: [SpaceMono](https://fonts.google.com/specimen/Space+Mono) 
     - Titles: [Viga](https://fonts.google.com/specimen/Viga)

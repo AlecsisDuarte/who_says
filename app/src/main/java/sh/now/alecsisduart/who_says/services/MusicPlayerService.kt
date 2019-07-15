@@ -111,13 +111,14 @@ class MusicPlayerService : Service() {
             SoundPool.Builder().setMaxStreams(20)
                 .setAudioAttributes(
                     AudioAttributes.Builder()
-                        .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
                         .setUsage(AudioAttributes.USAGE_GAME)
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                         .build()
                 )
                 .build()
         } else {
+            //Used deprecated constructor for older android versions
+            @Suppress("DEPRECATION")
             SoundPool(1, AudioManager.STREAM_MUSIC, 0)
         }
         musicMetadata.map {
@@ -130,7 +131,7 @@ class MusicPlayerService : Service() {
             initializeSoundPool()
 
             if (startMusic) {
-                mSoundPool?.setOnLoadCompleteListener { soundPool: SoundPool, sampleId: Int, status: Int ->
+                mSoundPool?.setOnLoadCompleteListener { _: SoundPool, sampleId: Int, status: Int ->
                     musicMetadata[BACKGROUND_MUSIC]?.let {
                         if (it[SOUND_ID]!! == sampleId && status == 0) {
                             onActionPlayMusic()
@@ -151,7 +152,6 @@ class MusicPlayerService : Service() {
     fun onActionPlayMusic() {
         onActionPlaySound(BACKGROUND_MUSIC, INFINITE_LOOP)
     }
-
 
     //Shared actions
     fun onActionStop() {

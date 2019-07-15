@@ -1,6 +1,5 @@
 package sh.now.alecsisduart.who_says.dialogs
 
-import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
@@ -13,13 +12,12 @@ import android.widget.Switch
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import kotlinx.android.synthetic.main.settings_dialog.*
-import sh.now.alecsisduart.who_says.*
+import sh.now.alecsisduart.who_says.R
 import sh.now.alecsisduart.who_says.enums.GameSpeed
 import sh.now.alecsisduart.who_says.enums.GridSize
 import sh.now.alecsisduart.who_says.helpers.ConfigurationHelper
 import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
 import sh.now.alecsisduart.who_says.services.MusicPlayerService
-import java.lang.ClassCastException
 
 
 private const val TAG = "SettingsDialog"
@@ -37,7 +35,7 @@ class SettingsDialog : DialogFragment() {
     private lateinit var originalGameSpeed: GameSpeed
     private lateinit var originalGridSize: GridSize
 
-    private lateinit var listener: SettingsDialogListener
+    private var listener: SettingsDialogListener? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.settings_dialog, container)
@@ -78,9 +76,10 @@ class SettingsDialog : DialogFragment() {
         super.onAttach(context)
         if (context is SettingsDialogListener) {
             listener = context
-        } else {
-            throw ClassCastException("${context.packageName} must implement SettingsDialogListener's onSavedSettingsDialog")
         }
+//        else {
+//            throw ClassCastException("${context.packageName} must implement SettingsDialogListener's onSavedSettingsDialog")
+//        }
     }
 
 
@@ -167,7 +166,7 @@ class SettingsDialog : DialogFragment() {
 
     private fun saveConfiguration() {
         configurationHelper.let {
-            listener.onSavedSettingsDialog(
+            listener?.onSavedSettingsDialog(
                 gridSizeChanged = it.gridSize != originalGridSize,
                 gameSpeedChanged = it.gameSpeed != originalGameSpeed,
                 soundOnChanged = it.soundOn != originalSoundOn
