@@ -1,18 +1,18 @@
 package sh.now.alecsisduart.who_says.bots
 
 import android.content.Context
-import android.media.Image
 import android.util.Log
 import android.widget.ImageButton
 import kotlinx.coroutines.*
 import sh.now.alecsisduart.who_says.bots.SimonBot.JobState.*
 import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
+import java.util.*
 import kotlin.math.max
 
 class SimonBot(
     private val buttons: List<ImageButton>,
     private val buttonsIds: Map<ImageButton, Int>,
-    private val previousPressedButtons: Array<Int>,
+    private val previousPressedButtons: LinkedList<Int>,
     private val speed: Float,
     private val context: Context,
     private val soundOn: Boolean
@@ -70,19 +70,16 @@ class SimonBot(
     }
 
     private suspend fun startSimonBot() = withContext(Dispatchers.Default) {
-        var step = 0
-        val maxSteps = previousPressedButtons.size + 1
-        val buttonsToPress = Array(maxSteps) { 0 }
+        val iterator = previousPressedButtons.iterator()
         val maxButtonIndex = buttons.size - 1
 
 
-        delay(400)
+        delay(300)
 
-        while (step < previousPressedButtons.size) {
+        while (iterator.hasNext()) {
             while (jobState == SUSPEND);
-            val index = previousPressedButtons[step]
+            val index = iterator.next()
             simonButtonHandling(index)
-            buttonsToPress[step++] = index
         }
 
 
@@ -90,11 +87,11 @@ class SimonBot(
 
         val index = (Math.random() * maxButtonIndex).toInt()
         simonButtonHandling(index, true)
-        buttonsToPress[step] = index
+        previousPressedButtons.add(index)
 
         jobState = FINISHED
         launch(Dispatchers.Main) {
-            listener.onSimonBotFinished(buttonsToPress)
+            listener.onSimonBotFinished(previousPressedButtons)
         }
     }
 
@@ -124,6 +121,6 @@ class SimonBot(
     }
 
     interface SimonBotListener {
-        fun onSimonBotFinished(buttonsPressed: Array<Int>)
+        fun onSimonBotFinished(buttonsPressed: LinkedList<Int>)
     }
 }

@@ -24,6 +24,7 @@ import sh.now.alecsisduart.who_says.helpers.GooglePlayServicesHelper
 import sh.now.alecsisduart.who_says.helpers.MusicPlayerHelper
 import sh.now.alecsisduart.who_says.models.AccomplishmentsModel
 import sh.now.alecsisduart.who_says.services.MusicPlayerService
+import java.util.*
 
 private const val MAX_SPEED = 12f
 
@@ -59,8 +60,8 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     private var confirmDialog: ConfirmDialog? = null
 
     //Player data
-    private lateinit var buttonsToPress: Array<Int>
-    private var curButtonToPress: Int = 0
+    private lateinit var buttonsToPress: LinkedList<Int>
+    private var buttonPressIterator: Iterator<Int>? = null
     private var curScore = 0
     private var accomplishments = AccomplishmentsModel()
 
@@ -155,11 +156,11 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     }
 
     //Loaders
-    fun changeTextViewColor(textView: TextView, colorId: Int) {
+    private fun changeTextViewColor(textView: TextView, colorId: Int) {
         textView.setTextColor(ContextCompat.getColor(this, colorId))
     }
 
-    fun readySetGoTextAnimation(onFinish: () -> Unit) = runBlocking {
+    private fun readySetGoTextAnimation(onFinish: () -> Unit) = runBlocking {
         GlobalScope.launch(Dispatchers.Main) {
             val waitDuration = 600L
             val firstTextView = turnSwitcher.getChildAt(0) as TextView
@@ -192,12 +193,12 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
 
     }
 
-    fun exitGame() {
+    private fun exitGame() {
         this.finish()
     }
 
     //Events
-    fun onPauseButtonClick(view: View) {
+    fun onPauseButtonClick(@Suppress("UNUSED_PARAMETER") view: View) {
         mMusicPlayerHelper.buttonSoundAsync()
         simonBot?.suspend()
         pauseDialog = PauseDialog.newInstance(supportFragmentManager)
@@ -205,45 +206,9 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
     }
 
     fun onSimonButtonClick(view: View) {
-        val imgbttn = view as ImageButton
-        simonButtonSound(imgbttn)
-
-        if (!isSimonTurn) {
-            val buttons = if (mConfigurationHelper.gridSize == GridSize.NORMAL) normalGridButtons else bigGridButtons
-            val index = buttonsToPress[curButtonToPress]
-            if (buttons[index] == imgbttn) {
-                ++curButtonToPress
-                //Already pressed all buttons
-                if (curButtonToPress == buttonsToPress.size) {
-                    isSimonTurn = true
-                    curButtonToPress = 0
-                    curScore += calculateScore()
-                    scoreSwitcher.setText(curScore.toString())
-                    turnSwitcher.setText(getText(R.string.simon))
-                    initializeSimon(this)
-                }
-            } else {
-                if (confirmDialog == null || !confirmDialog!!.isActive()) {
-                    mMusicPlayerHelper.looserSoundAsync()
-                    if (mConfigurationHelper.gridSize == GridSize.NORMAL) {
-                        accomplishments.normalScore = curScore
-                    } else {
-                        accomplishments.bigScore = curScore
-                    }
-                    checkForAccomplishments()
-                    confirmDialog = ConfirmDialog.Builder(applicationContext, supportFragmentManager)
-                        .setTitle(getText(R.string.you_want_to_replay))
-                        .setMessage(getString(R.string.you_want_to_replay_description))
-                        .setConfirmButton(R.string.accept, View.OnClickListener { restartGame() })
-                        .setCancelButton(R.string.cancel, View.OnClickListener {
-                            exitGame()
-                        })
-                        .show()
-
-                }
-            }
-
-        }
+        val pressedButton = view as ImageButton
+        simonButtonSound(pressedButton)
+        onButtonPressedByUser(pressedButton)
     }
 
     //Actions
@@ -255,9 +220,9 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
         isSimonTurn = true
         steps = 1
         speed = mConfigurationHelper.gameSpeed.speed
-        buttonsToPress = emptyArray()
+        buttonsToPress = LinkedList()
 
-        //Acomplishments
+        //Accomplishments
         ++accomplishments.plays
         checkForAccomplishments()
 
@@ -266,6 +231,61 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
             initializeSimon(this)
         }
 
+    }
+
+    private fun onButtonPressedByUser(pressedButton: ImageButton) {
+        if (!isSimonTurn) {
+            //Verify that there are still buttons to be pressed
+            if (buttonPressIterator == null || !buttonPressIterator!!.hasNext()) {
+                return
+            }
+
+            val buttons = getDisplayedSimonButtons()
+            val index = buttonPressIterator!!.next()
+
+            if (buttons[index] == pressedButton) {
+                //Already pressed all buttons
+                if (!buttonPressIterator!!.hasNext()) {
+                    userFinishedSequence(this)
+                }
+            } else {
+                wrongButtonPressed()
+            }
+
+        }
+    }
+
+    private fun wrongButtonPressed() {
+        if (confirmDialog == null || !confirmDialog!!.isActive()) {
+            mMusicPlayerHelper.looserSoundAsync()
+            if (mConfigurationHelper.gridSize == GridSize.NORMAL) {
+                accomplishments.normalScore = curScore
+            } else {
+                accomplishments.bigScore = curScore
+            }
+            checkForAccomplishments()
+            confirmDialog = ConfirmDialog.Builder(applicationContext, supportFragmentManager)
+                .setTitle(getText(R.string.you_want_to_replay))
+                .setMessage(getString(R.string.you_want_to_replay_description))
+                .setConfirmButton(R.string.accept, View.OnClickListener { restartGame() })
+                .setCancelButton(R.string.cancel, View.OnClickListener {
+                    exitGame()
+                })
+                .show()
+
+        }
+    }
+
+    private fun userFinishedSequence(context: Context) = runBlocking<Unit> {
+        isSimonTurn = true
+        curScore += calculateScore()
+        scoreSwitcher.setText(curScore.toString())
+        turnSwitcher.setText(getText(R.string.simon))
+        //We give the user some time to prepare
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(400)
+            initializeSimon(context)
+        }
     }
 
     private fun simonButtonSound(imageButton: ImageButton) {
@@ -286,7 +306,7 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
                 context,
                 mConfigurationHelper.soundOn
             )
-        GlobalScope.async(Dispatchers.Default) {
+        GlobalScope.launch(Dispatchers.Default) {
             simonBot?.start()
         }
     }
@@ -313,6 +333,13 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
             }
         }
     }
+
+    private fun getDisplayedSimonButtons() =
+        if (mConfigurationHelper.gridSize == GridSize.NORMAL) {
+            normalGridButtons
+        } else {
+            bigGridButtons
+        }
 
     private fun checkForAccomplishments() {
         accomplishments.apply {
@@ -342,9 +369,9 @@ class GameBoardActivity : AppCompatActivity(), PauseDialog.PauseDialogListener, 
 
 
     //Listeners
-    override fun onSimonBotFinished(buttonsPressed: Array<Int>) {
+    override fun onSimonBotFinished(buttonsPressed: LinkedList<Int>) {
         buttonsToPress = buttonsPressed
-        curButtonToPress = 0
+        buttonPressIterator = buttonsPressed.iterator()
 
         //We speed up and increase the amount of buttons to press
         ++steps
